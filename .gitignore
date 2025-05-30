@@ -1,0 +1,66 @@
+# ======================================
+# Sistema operacional
+# ======================================
+.DS_Store
+Thumbs.db
+ehthumbs.db
+Desktop.ini
+
+# ======================================
+# Arquivos temporários e backups
+# ======================================
+*.tmp
+*.bak
+*.old
+*.swp
+*.swo
+*.swn
+*.sublime-workspace
+*.sublime-project
+
+# ======================================
+# MATLAB
+# ======================================
+*.asv     # AutoSave
+*.autosave
+*.mex*    # Compiled binaries
+*.mat     # Dados binários, se não quiser versionar
+*.fig     # Arquivos de figura
+*.mdl     # Modelos Simulink (opcional)
+*.slx     # Modelos Simulink (opcional)
+
+# ======================================
+# UltraEdit
+# ======================================
+*.uek     # Configurações temporárias
+*.tmp     # Arquivos temporários
+
+# ======================================
+# Python (caso use)
+# ======================================
+__pycache__/
+*.pyc
+*.pyo
+*.pyd
+*.egg-info/
+
+# ======================================
+# Logs
+# ======================================
+*.log
+
+# ======================================
+# Outros
+# ======================================
+*.zip
+*.tar
+*.tar.gz
+*.rar
+*.7z
+*.exe
+*.dll
+
+# ======================================
+# Jupyter Notebooks checkpoints
+# ======================================
+.ipynb_checkpoints/
