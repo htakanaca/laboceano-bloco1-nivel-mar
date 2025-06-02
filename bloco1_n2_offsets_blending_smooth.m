@@ -50,17 +50,17 @@ data_dir = 'C:/Users/SEU_NOME/SEUS_DADOS/';
 data_dir_b1n1 = 'C:/Users/SEU_NOME/SEUS_DADOS/';
 
 % Carrega os dados de nível do mar da Bóia BH07:
-arquivo = fullfile(data_dir, 'arquivo.mat');
+arquivo = fullfile(data_dir, 'nomedoarquivo.mat');
 load(arquivo);
 
 % Copia os dados para uma variável com nome mais simples e limpa a 
 % variável original para economizar memória:
-dados = arquivo;
-clear arquivo
+dados = nomedoarquivo;
+clear nomedoarquivo
 
 % Carrega a série de previsão harmônica previamente ajustada com o U-Tide 
 % (salva pelo script "bloco1_n1_gapfilling_tide_codiga2011.m"):
-arquivo_b1n1 = fullfile(data_dir_b1n1, 'arquivo_b1n1.mat');
+arquivo_b1n1 = fullfile(data_dir_b1n1, 'nomedo_arquivo_b1n1.mat');
 load(arquivo_b1n1);
 
 % Define o tamanho do vetor de dados (no tempo) para trabalhar:
