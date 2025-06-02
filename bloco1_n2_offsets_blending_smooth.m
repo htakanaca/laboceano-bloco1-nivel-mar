@@ -1,6 +1,18 @@
 %
-% Script DE REVISÃO DE OFFSETS de pré-processing dos dados de NÌVEL DO MAR de ADCP da Bóia BH07.
-% Hatsue Takanaca de Decco.
+% Bloco 1 - Scripts de Processamento LabOceano
+%
+% Passo 2: Revisão de offsets gerados pela previsão de maré e blending 
+% 
+% Aplicação: Dados de NÌVEL DO MAR de ADCP da Bóia BH07, na Baía de 
+% Guanabara.
+%
+% Este script realiza a identificação, análise e ajuste de offsets
+% nos dados pré-processados, aplicando blending e suavização para
+% garantir a continuidade e qualidade da série temporal.
+%
+% Hatsue Takanaca de Decco, 30/05/2025.
+%
+% Contribuições de IA:
 % ------------------------------------------------------------
 % Este script foi desenvolvido com o auxílio da inteligência
 % artificial ChatGPT (OpenAI), em maio de 2025.
@@ -11,6 +23,17 @@
 % A coautoria simbólica da IA é reconhecida no aspecto técnico,
 % sem implicar autoria científica ou responsabilidade intelectual.
 % ------------------------------------------------------------
+%
+% Dados de Nível do Mar (metros):
+% - Frequência amostral: 5 minutos.
+% - Período: conforme arquivo de entrada.
+%
+% ATENÇÃO:
+% - Este script deve ser executado após o preenchimento das falhas
+%   amostrais com o método harmônico (ex: U-Tide).
+% - Os dados devem estar organizados com NaNs para as lacunas.
+%
+
 clear
 clc
 
@@ -165,6 +188,34 @@ for ii = 2:length(duracao_nan_index_global)
     nivel_boia07_suave(idx_fim - win_movmean + 1 : idx_fim) = ...
         [trecho_fim(1:win_movmean-1); media_fim(win_movmean:end)];
 end
+
+%% Salva as variáveis
+
+% Formato .mat:
+save ('nivel_boia07_suave.mat','nivel_boia07_suave');
+
+% Formato .csv:
+dados_suavizados = dados(1:tamanho_tempo_total,1:6);
+dados_suavizados(:,7) = nivel_boia07_suave;
+
+% Sem cabeçalho:
+% dlmwrite('nivel_boia07_suave.csv', dados_suavizados, 'delimiter', ',', 'precision', 6);
+
+filename = 'nivel_boia07_suave.csv';
+fid = fopen(filename, 'w');
+
+% Escreve o cabeçalho
+fprintf(fid, 'DD;MM;YYYY;HH;MM;SS;Nivel(m)\n');
+
+% Escreve os dados com separador ';' e 4 casas decimais
+for i = 1:size(dados_suavizados,1)
+    fprintf(fid, '%02d;%02d;%04d;%02d;%02d;%02d;%.4f\n', ...
+        dados_suavizados(i,1), dados_suavizados(i,2), dados_suavizados(i,3), ...
+        dados_suavizados(i,4), dados_suavizados(i,5), dados_suavizados(i,6), ...
+        dados_suavizados(i,7));
+end
+
+fclose(fid);
 
 %% Plotagem para inspeção visual
 %
