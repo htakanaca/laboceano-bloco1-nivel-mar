@@ -1,7 +1,11 @@
 %
 % Bloco 1 - Scripts de Processamento LabOceano
-% Script para Preenchimento de Falhas Amostrais nos dados de NÌVEL DO MAR 
-% de ADCP da Bóia BH07, na Baía de Guanabara. 
+%
+% Passo 1: Preenchimento de Falhas Amostrais com Previsão de Maré
+%
+% Aplicação: Dados de NÌVEL DO MAR de ADCP da Bóia BH07, na Baía de 
+% Guanabara.
+%
 % Utiliza-se o pacote U-Tide de Codiga (2011) para preencher as falhas 
 % com previsão de maré.
 %
@@ -77,32 +81,39 @@ tempo_total_vetorial = 1:tamanho_tempo_total;
 % Identifica posições com dados faltantes (NaN) no nível do mar:
 marca_nan=isnan(dados(:,7));
 
-%  Adiciona um zero no final para facilitar a detecção de bordas de blocos 
-% de NaN:
+% Adiciona um zero no final para facilitar a detecção de bordas de blocos 
+% de NaN e evitar erro no cálculo de diferenças, garantindo vetor como 
+% linha:
 marca_nan(end+1)=0;
 marca_nan=marca_nan';
 
 % Calcula a diferença entre elementos consecutivos para identificar 
 % transições:
+% Onde diff = 1, começa uma falha; onde diff = -1, termina.
 diff_marca_nan(1:length(marca_nan))=zeros;
 diff_marca_nan(2:end)=diff(marca_nan);
 
-% Ajuste do primeiro elemento da diferença:
+% Ajuste para garantir que o primeiro elemento do vetor de diferenças 
+% esteja corretamente inicializado:
 % (Se a série começa com dado (e não NaN), é 0)
 diff_marca_nan(1)=0;
 
-% Identifica índices de início de blocos de NaN:
+% Localiza os índices onde começam os blocos de NaNs (falhas):
+% O preenchimento do vetor ini_nan_index_global começa a partir da posição 
+% 2, para evitar erros se a série começar com NaN.
 xx=find(diff_marca_nan==1);
 ini_nan_index_global(2:length(xx)+1)=xx;
 
-% Identifica índices de fim de blocos de NaN:
+%  Identifica os índices finais das falhas, ajustando para referenciar o 
+% último índice de NaN antes do retorno aos dados válidos:
 xx=find(diff_marca_nan==-1);
 fim_nan_index_global(2:length(xx)+1)=xx-1;
 
-%Calcula a duração de cada bloco de NaN:
+%Calcula a duração de cada bloco de NaN (lacuna) detectada:
 duracao_nan_index_global=fim_nan_index_global-ini_nan_index_global;
 
-% Extrai a série de nível do mar:
+% Extrai a série de nível do mar original, da coluna 7, para uma variável 
+% direta:
 nivel_boia07=dados(:,7);
 
 %% Preenchimento Harmônico com Previsão de Maré com o U-Tide (Codiga,2011)
