@@ -9,7 +9,7 @@
 % Utiliza-se o pacote U-Tide de Codiga (2011) para preencher as falhas 
 % com previsão de maré.
 %
-% Hatsue Takanaca de Decco, 02/04/2025.
+% Hatsue Takanaca de Decco, Abril/2025.
 %
 % Contribuições de IA: 
 % ------------------------------------------------------------
@@ -58,8 +58,23 @@ clc
 % Defina aqui o caminho para o diretório onde estão os dados
 data_dir = 'C:/Users/SEU_NOME/SEUS_DADOS/';
 
-% Carrega os dados de nível do mar da Bóia BH07:
-arquivo = fullfile(data_dir, 'nomedoarquivo.mat');
+% Define o nome do arquivo de dados:
+nome_arquivo = 'nomedoarquivo.mat'; % .mat, .txt, etc
+arquivo = fullfile(data_dir, nome_arquivo);
+
+% Verifica se o arquivo existe antes de carregar
+if exist(arquivo, 'file') ~= 2
+    error(['\n\n' ...
+           '******************************\n' ...
+           '***       ATENÇÃO!         ***\n' ...
+           '******************************\n' ...
+           '\n' ...
+           'ARQUIVO NÃO ENCONTRADO!\n\n' ...
+           'Verifique se o diretório está correto:\n  %s\n\n' ...
+           'E se o nome do arquivo está correto:\n  %s\n\n'], ...
+           data_dir, nome_arquivo);
+end
+
 load(arquivo);
 
 % Organiza o vetor de dados e limpa variável original (SUBSTITUA pelo nome
@@ -67,26 +82,23 @@ load(arquivo);
 dados = nomedoarquivo;
 clear nomedoarquivo
 
+% Verificação do formato dos dados lidos:
+% Checa se dados tem pelo menos 7 colunas
+if size(dados,2) < 7
+    error(['O vetor de dados deve ter pelo menos 7 colunas com o formato:\n' ...
+           'DD,MM,YYYY,HH,MM,SS,Nível (metros).\n' ...
+           'Verifique seu arquivo de entrada.']);
+end
+
 % Define o tamanho do vetor de dados (no tempo) para trabalhar:
 tamanho_tempo_total = length(dados(:,7));
 
 %% Definição de parâmetros e variáveis
 
-% Configura parâmetros para janela deslizante e passo de tempo da janela:
-% Janela de 3 dias (em pontos: 12/hora * 24 horas * 3 dias):
-janela_deslizante = 3*12*24; 
-% Passo de 3 horas (12/hora * 3 horas):
-passo_janela = 36; 
-
-% contadores:
-conti=0;
-contf=janela_deslizante;
-
 % Vetor temporal total (base de referência):
 tempo_total_vetorial = 1:tamanho_tempo_total;
 
-
-%% Identificação dos blocos de NaN (falhas amostrais) para fazer o 
+% Identificação dos blocos de NaN (falhas amostrais) para fazer o 
 % preenchimento harmônico de maré posteriormente:
 
 % Identifica posições com dados faltantes (NaN) no nível do mar:
@@ -125,7 +137,7 @@ duracao_nan_index_global=fim_nan_index_global-ini_nan_index_global;
 
 % Extrai a série de nível do mar original, da coluna 7, para uma variável 
 % direta:
-nivel_boia07=dados(:,7);
+nivel_adcp=dados(:,7);
 
 %% Preenchimento Harmônico com Previsão de Maré com o U-Tide (Codiga,2011)
 
@@ -145,7 +157,7 @@ for ii=2:length(duracao_nan_index_global)
     
     % Estima coeficientes harmônicos de maré com U-Tide:
     clear coef
-    coef = ut_solv ( vetor_tempo_analise', nivel_boia07(1:ini_nan_index_global(ii)-1),[], -22.8219,'auto');
+    coef = ut_solv ( vetor_tempo_analise', nivel_adcp(1:ini_nan_index_global(ii)-1),[], -22.8219,'auto');
     
     % Define o período de previsão de maré - desde o início até o fim da lacuna:
     contatt=1;
@@ -159,8 +171,8 @@ for ii=2:length(duracao_nan_index_global)
     [ previsao, ~] = ut_reconstr ( vetor_tempo_previsao', coef );
     
     % Ajuste de offset - média entre valores antes e depois da lacuna:
-    nivel_antes=nivel_boia07(ini_nan_index_global(ii)-1);
-    nivel_depois=nivel_boia07(fim_nan_index_global(ii)+1);
+    nivel_antes=nivel_adcp(ini_nan_index_global(ii)-1);
+    nivel_depois=nivel_adcp(fim_nan_index_global(ii)+1);
    
     media_prepos_lacuna = (nivel_antes + nivel_depois) / 2;
     media_previsao = mean(previsao);  % centro da previsão
@@ -170,7 +182,7 @@ for ii=2:length(duracao_nan_index_global)
     previsao_ajustada = previsao + offset;
     
     % Substitui a lacuna na série original pela previsão ajustada:
-    nivel_boia07(ini_nan_index_global(ii):fim_nan_index_global(ii)) = previsao_ajustada;
+    nivel_adcp(ini_nan_index_global(ii):fim_nan_index_global(ii)) = previsao_ajustada;
     
     % Mensagem indicativa de preenchimento realizado:
     disp(['Preenchimento Harmônico de Maré de ', num2str(ini_nan_index_global(ii)), ' a ', num2str(fim_nan_index_global(ii)), ' (offset direto aplicado)'])
@@ -180,19 +192,19 @@ end
 %% Salva as variáveis
 
 % Formato .mat:
-nivel_boia07_comtide=nivel_boia07;
-nivel_boia07=dados(:,7);
+nivel_adcp_comtide=nivel_adcp;
+nivel_adcp=dados(:,7);
 
-save ('nivel_boia07_comtide.mat','nivel_boia07_comtide');
+save ('nivel_adcp_comtide.mat','nivel_adcp_comtide');
 
 % Formato .csv:
 dados_preenchidos = dados(1:tamanho_tempo_total,1:6);
-dados_preenchidos(:,7) = nivel_boia07_comtide;
+dados_preenchidos(:,7) = nivel_adcp_comtide;
 
 % Sem cabeçalho:
-% dlmwrite('nivel_boia07_comtide.csv', dados_preenchidos, 'delimiter', ',', 'precision', 6);
+% dlmwrite('nivel_adcp_comtide.csv', dados_preenchidos, 'delimiter', ',', 'precision', 6);
 
-filename = 'nivel_boia07_comtide.csv';
+filename = 'nivel_adcp_comtide.csv';
 fid = fopen(filename, 'w');
 
 % Escreve o cabeçalho
