@@ -39,19 +39,29 @@ clc
 
 %% Abertura e Organização dos dados
 
-% Carrega o arquivo de dados originais (com falhas amostrais) da estação 
-% BH07, contendo a série temporal de nível do mar:
+% === CONFIGURAÇÃO DO USUÁRIO ===
+% Defina aqui o caminho para o diretório onde estão os dados originais 
+% (com falhas amostrais) da estação BH07, contendo a série temporal de 
+% nível do mar:
+data_dir = 'C:/Users/SEU_NOME/SEUS_DADOS/';
+% Defina aqui o caminho para o diretório onde está o arquivo da série de 
+% previsão harmônica previamente ajustada com o U-Tide 
+% (salva pelo script "bloco1_n1_gapfilling_tide_codiga2011.m")
+data_dir_b1n1 = 'C:/Users/SEU_NOME/SEUS_DADOS/';
 
-load D:\Hatt\Dados_sismo\Estacao_Guanabara_BH_Boia_07\Dados_brutos_do_site\Estacao_Guanabara_BH_Boia_07_nivel.TXT
+% Carrega os dados de nível do mar da Bóia BH07:
+arquivo = fullfile(data_dir, 'arquivo.mat');
+load(arquivo);
 
 % Copia os dados para uma variável com nome mais simples e limpa a 
 % variável original para economizar memória:
-dados = Estacao_Guanabara_BH_Boia_07_nivel;
-clear Estacao_Guanabara_BH_Boia_07_nivel
+dados = arquivo;
+clear arquivo
 
 % Carrega a série de previsão harmônica previamente ajustada com o U-Tide 
 % (salva pelo script "bloco1_n1_gapfilling_tide_codiga2011.m"):
-load D:\Hatsue\artigos_de_projetos\Sapura_RN_previsao\analises_de_dados\DADO_nivel_boia07_comtide.mat
+arquivo_b1n1 = fullfile(data_dir_b1n1, 'arquivo_b1n1.mat');
+load(arquivo_b1n1);
 
 % Define o tamanho do vetor de dados (no tempo) para trabalhar:
 tamanho_tempo_total = length(dados(:,7));
