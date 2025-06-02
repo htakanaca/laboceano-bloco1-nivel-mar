@@ -59,13 +59,13 @@ clc
 data_dir = 'C:/Users/SEU_NOME/SEUS_DADOS/';
 
 % Carrega os dados de nível do mar da Bóia BH07:
-arquivo = fullfile(data_dir, 'arquivo.mat');
+arquivo = fullfile(data_dir, 'nomedoarquivo.mat');
 load(arquivo);
 
 % Organiza o vetor de dados e limpa variável original (SUBSTITUA pelo nome
 % da sua variável do arquivo):
-dados = arquivo;
-clear arquivo
+dados = nomedoarquivo;
+clear nomedoarquivo
 
 % Define o tamanho do vetor de dados (no tempo) para trabalhar:
 tamanho_tempo_total = length(dados(:,7));
