@@ -33,13 +33,18 @@
 % - Formato: DD,MM,YYYY,HH,MM,SS,Nível (metros).
 %
 % ATENÇÃO: 
-% 1) Sobre o formato das lacunas de dados
+% 1) Sobre o caminho e formato dos dados:
+% Defina o caminho dos seus dados na variável abaixo "data_dir". Os dados
+% devem estar no formato definido acima.
+%
+% 2) Sobre o formato das lacunas de dados:
 % Os dados faltantes devem estar preenchidos com NaN!
 % => se as falhas amostrais estiverem SEM DADO na coluna 7 (ou em toda a
 % linha), vai dar ERRO.
 % => se as falhas amostrais estiverem preenchidas com 0 na coluna 7 (ou em 
 % toda a linha), vai dar ERRO.
-% 2) Sobre o uso do U-Tide:
+%
+% 3) Sobre o uso do U-Tide:
 % Os arquivos do U-Tide devem estar de acordo com UMA das opções:
 % a) na mesma pasta em que for executar este script
 % b) salvo no PATH do Matlab
@@ -49,12 +54,18 @@ clc
 
 %% Abertura e Organização dos dados
 
-% Carrega os dados de nível do mar da Bóia BH07:
-load D:\Hatsue\Dados_sismo\Estacao_Guanabara_BH_Boia_07\Dados_brutos_do_site\Estacao_Guanabara_BH_Boia_07_nivel.TXT
+% === CONFIGURAÇÃO DO USUÁRIO ===
+% Defina aqui o caminho para o diretório onde estão os dados
+data_dir = 'C:/Users/SEU_NOME/SEUS_DADOS/';
 
-% Organiza o vetor de dados e limpa variável original:
-dados = Estacao_Guanabara_BH_Boia_07_nivel;
-clear Estacao_Guanabara_BH_Boia_07_nivel
+% Carrega os dados de nível do mar da Bóia BH07:
+arquivo = fullfile(data_dir, 'arquivo.mat');
+load(arquivo);
+
+% Organiza o vetor de dados e limpa variável original (SUBSTITUA pelo nome
+% da sua variável do arquivo):
+dados = arquivo;
+clear arquivo
 
 % Define o tamanho do vetor de dados (no tempo) para trabalhar:
 tamanho_tempo_total = length(dados(:,7));
