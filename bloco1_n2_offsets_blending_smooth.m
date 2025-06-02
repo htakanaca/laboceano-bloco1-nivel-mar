@@ -40,27 +40,79 @@ clc
 %% Abertura e Organização dos dados
 
 % === CONFIGURAÇÃO DO USUÁRIO ===
-% Defina aqui o caminho para o diretório onde estão os dados originais 
-% (com falhas amostrais) da estação BH07, contendo a série temporal de 
-% nível do mar:
-data_dir = 'C:/Users/SEU_NOME/SEUS_DADOS/';
+% Defina aqui o caminho para o diretório onde estão os dados originais, que
+% ainda contém falhas amostrais, para fins de comparação posterior:
+data_dir = 'D:\Hatt\Dados_sismo\Estacao_Guanabara_BH_Boia_07\Dados_brutos_do_site\';
+
+% Define o nome do arquivo de dados:
+nome_arquivo = 'Estacao_Guanabara_BH_Boia_07_nivel.txt'; % .mat, .txt, etc
+arquivo = fullfile(data_dir, nome_arquivo);
+
+% Verifica se o arquivo existe antes de carregar
+if exist(arquivo, 'file') ~= 2
+    error(['\n\n' ...
+           '******************************\n' ...
+           '***       ATENÇÃO!         ***\n' ...
+           '******************************\n' ...
+           '\n' ...
+           'ARQUIVO NÃO ENCONTRADO!\n\n' ...
+           'Verifique se o diretório está correto:\n  %s\n\n' ...
+           'E se o nome do arquivo está correto:\n  %s\n\n'], ...
+           data_dir, nome_arquivo);
+end
+
+[~, ~, ext] = fileparts(arquivo);
+
+switch lower(ext)
+    case '.mat'
+        % === ATENÇÃO: ===
+        % Este comando carrega a **primeira variável** do arquivo .mat:
+        vars = whos('-file', arquivo);
+        if isempty(vars)
+            error('Arquivo MAT não contém variáveis.');
+        end
+        nome_var = vars(1).name;  % <-- Aqui pega automaticamente a 1ª variável!
+        
+        % => Garanta que essa variável seja a que contém os dados no formato:
+        % DD,MM,YYYY,HH,MM,SS,Nível (metros)
+        % Caso não seja, altere 'vars(1).name' para o nome correto da variável.
+        
+        load(arquivo, nome_var);
+        dados = eval(nome_var);
+        clear(nome_var);
+        
+    case '.txt'
+        % Arquivo .txt: carrega diretamente como matriz numérica.
+        dados = load(arquivo);
+        
+    otherwise
+        error('Formato de arquivo não suportado.');
+end
+
+
+
 % Defina aqui o caminho para o diretório onde está o arquivo da série de 
 % previsão harmônica previamente ajustada com o U-Tide 
 % (salva pelo script "bloco1_n1_gapfilling_tide_codiga2011.m")
-data_dir_b1n1 = 'C:/Users/SEU_NOME/SEUS_DADOS/';
-
-% Carrega os dados de nível do mar da Bóia BH07:
-arquivo = fullfile(data_dir, 'nomedoarquivo.mat');
-load(arquivo);
-
-% Copia os dados para uma variável com nome mais simples e limpa a 
-% variável original para economizar memória:
-dados = nomedoarquivo;
-clear nomedoarquivo
+data_dir_b1n1 = 'D:\Hatsue\artigos_de_projetos\Sapura_RN_previsao\analises_de_dados\github\bloco_1';
 
 % Carrega a série de previsão harmônica previamente ajustada com o U-Tide 
 % (salva pelo script "bloco1_n1_gapfilling_tide_codiga2011.m"):
-arquivo_b1n1 = fullfile(data_dir_b1n1, 'nomedo_arquivo_b1n1.mat');
+arquivo_b1n1 = fullfile(data_dir_b1n1, 'nivel_adcp_comtide.mat');
+
+% Verifica se o arquivo existe antes de carregar
+if exist(arquivo_b1n1, 'file') ~= 2
+    error(['\n\n' ...
+           '******************************\n' ...
+           '***       ATENÇÃO!         ***\n' ...
+           '******************************\n' ...
+           '\n' ...
+           'ARQUIVO NÃO ENCONTRADO!\n\n' ...
+           'Verifique se o diretório está correto:\n  %s\n\n' ...
+           'E se o nome do arquivo está correto:\n  %s\n\n'], ...
+           data_dir_b1n1, arquivo_b1n1);
+end
+
 load(arquivo_b1n1);
 
 % Define o tamanho do vetor de dados (no tempo) para trabalhar:
@@ -109,11 +161,11 @@ duracao_nan_index_global=fim_nan_index_global-ini_nan_index_global;
 
 % Extrai a série de nível do mar original, da coluna 7, para uma variável 
 % direta:
-nivel_boia07=dados(:,7);
+nivel_adcp=dados(:,7);
 
 % Guarda uma cópia da previsão harmônica original para posterior 
 % comparação com a versão suavizada:
-nivel_boia07_comtide_raw = nivel_boia07_comtide; 
+nivel_adcp_comtide_raw = nivel_adcp_comtide; 
 
 %% Blending nas bordas das lacunas
 %
@@ -139,29 +191,29 @@ for ii=2:length(duracao_nan_index_global)
         % Se houver dados suficientes antes da lacuna para aplicar o 
         % blending, separa borda_obs (dados imediatamente antes da lacuna) 
         % e borda_pred (dados previstos após a lacuna):
-        borda_obs = nivel_boia07_comtide(idx_ini - n_blend : idx_ini - 1);
-        borda_pred = nivel_boia07_comtide(idx_ini : idx_ini + n_blend - 1);
+        borda_obs = nivel_adcp_comtide(idx_ini - n_blend : idx_ini - 1);
+        borda_pred = nivel_adcp_comtide(idx_ini : idx_ini + n_blend - 1);
         % Realiza interpolação linear progressiva entre as bordas, 
         % suavizando a transição para evitar saltos abruptos:
         for jj = 1:n_blend
             w = jj / (n_blend + 1);
-            nivel_boia07_comtide(idx_ini - 1 + jj) = (1 - w) * borda_obs(jj) + w * borda_pred(jj);
+            nivel_adcp_comtide(idx_ini - 1 + jj) = (1 - w) * borda_obs(jj) + w * borda_pred(jj);
         end
     end
 
     % Blending na borda final (após a lacuna)
     % Garante que há pontos suficientes após a lacuna para aplicar o 
     % blending:
-    if idx_fim + n_blend <= length(nivel_boia07_comtide)
+    if idx_fim + n_blend <= length(nivel_adcp_comtide)
         % Extrai bordas para suavização: borda_pred (antes do fim da 
         % lacuna) e borda_obs (imediatamente após a lacuna):
-        borda_pred = nivel_boia07_comtide(idx_fim - n_blend + 1 : idx_fim);
-        borda_obs = nivel_boia07_comtide(idx_fim + 1 : idx_fim + n_blend);
+        borda_pred = nivel_adcp_comtide(idx_fim - n_blend + 1 : idx_fim);
+        borda_obs = nivel_adcp_comtide(idx_fim + 1 : idx_fim + n_blend);
         % Aplica blending progressivo na borda final, com mesma lógica de 
         % suavização linear:
         for jj = 1:n_blend
             w = jj / (n_blend + 1);
-            nivel_boia07_comtide(idx_fim - n_blend + jj) = (1 - w) * borda_pred(jj) + w * borda_obs(jj);
+            nivel_adcp_comtide(idx_fim - n_blend + jj) = (1 - w) * borda_pred(jj) + w * borda_obs(jj);
         end
     end
 end
@@ -175,7 +227,7 @@ win_movmean = 3;
 
 % Cria cópia da série já com blending, para aplicar a suavização final 
 % sem sobrescrever:
-nivel_boia07_suave = nivel_boia07_comtide;  
+nivel_adcp_suave = nivel_adcp_comtide;  
 
 % Aplica suavização em todas as lacunas detectadas:
 for ii = 2:length(duracao_nan_index_global)
@@ -186,35 +238,35 @@ for ii = 2:length(duracao_nan_index_global)
     % Suavização borda inicial
     % Seleciona o trecho inicial após a lacuna e aplica filtro de 
     % média móvel:
-    trecho_ini = nivel_boia07_suave(idx_ini : idx_ini + win_movmean - 1);
+    trecho_ini = nivel_adcp_suave(idx_ini : idx_ini + win_movmean - 1);
     media_ini = filter(ones(1, win_movmean)/win_movmean, 1, trecho_ini);
     % Ajusta a saída do filtro para compensar o atraso introduzido pelo 
     % filtro causal:
-    nivel_boia07_suave(idx_ini : idx_ini + win_movmean - 1) = ...
+    nivel_adcp_suave(idx_ini : idx_ini + win_movmean - 1) = ...
         [trecho_ini(1:win_movmean-1); media_ini(win_movmean:end)];
     
     % Suavização borda final
     % Repete o mesmo processo na borda final, garantindo transição 
     % suave e sem descontinuidades:
-    trecho_fim = nivel_boia07_suave(idx_fim - win_movmean + 1 : idx_fim);
+    trecho_fim = nivel_adcp_suave(idx_fim - win_movmean + 1 : idx_fim);
     media_fim = filter(ones(1, win_movmean)/win_movmean, 1, trecho_fim);
-    nivel_boia07_suave(idx_fim - win_movmean + 1 : idx_fim) = ...
+    nivel_adcp_suave(idx_fim - win_movmean + 1 : idx_fim) = ...
         [trecho_fim(1:win_movmean-1); media_fim(win_movmean:end)];
 end
 
 %% Salva as variáveis
 
 % Formato .mat:
-save ('nivel_boia07_suave.mat','nivel_boia07_suave');
+save ('nivel_adcp_suave.mat','nivel_adcp_suave');
 
 % Formato .csv:
 dados_suavizados = dados(1:tamanho_tempo_total,1:6);
-dados_suavizados(:,7) = nivel_boia07_suave;
+dados_suavizados(:,7) = nivel_adcp_suave;
 
 % Sem cabeçalho:
-% dlmwrite('nivel_boia07_suave.csv', dados_suavizados, 'delimiter', ',', 'precision', 6);
+% dlmwrite('nivel_adcp_suave.csv', dados_suavizados, 'delimiter', ',', 'precision', 6);
 
-filename = 'nivel_boia07_suave.csv';
+filename = 'nivel_adcp_suave.csv';
 fid = fopen(filename, 'w');
 
 % Escreve o cabeçalho
@@ -244,16 +296,16 @@ hold on
 % processamento
 
 % Sinal original (com NaNs):
-plot(nivel_boia07, 'k', 'DisplayName', 'Série original')
+plot(nivel_adcp, 'k', 'DisplayName', 'Série original')
 
 % Previsão harmônica antes do blending:
-plot(nivel_boia07_comtide_raw, 'b', 'DisplayName', 'Previsão harmônica (raw)')
+plot(nivel_adcp_comtide_raw, 'b', 'DisplayName', 'Previsão harmônica (raw)')
 
 % Previsão harmônica suavizada (com blending):
-plot(nivel_boia07_comtide, 'm', 'LineWidth', 1.2, 'DisplayName', 'Previsão com blending')
+plot(nivel_adcp_comtide, 'm', 'LineWidth', 1.2, 'DisplayName', 'Previsão com blending')
 
 % Previsão harmônica pós-suavização com blending:
-plot(nivel_boia07_suave, 'c', 'LineWidth', 1.2, 'DisplayName', 'Previsão com blending e pós-suavização')
+plot(nivel_adcp_suave, 'c', 'LineWidth', 1.2, 'DisplayName', 'Previsão com blending e pós-suavização')
 
 % Legenda e título:
 legend('Location', 'best')
