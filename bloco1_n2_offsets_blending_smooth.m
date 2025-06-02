@@ -42,7 +42,7 @@ clc
 % Carrega o arquivo de dados originais (com falhas amostrais) da estação 
 % BH07, contendo a série temporal de nível do mar:
 
-load D:\Hatsue\Dados_sismo\Estacao_Guanabara_BH_Boia_07\Dados_brutos_do_site\Estacao_Guanabara_BH_Boia_07_nivel.TXT
+load D:\Hatt\Dados_sismo\Estacao_Guanabara_BH_Boia_07\Dados_brutos_do_site\Estacao_Guanabara_BH_Boia_07_nivel.TXT
 
 % Copia os dados para uma variável com nome mais simples e limpa a 
 % variável original para economizar memória:
@@ -51,7 +51,10 @@ clear Estacao_Guanabara_BH_Boia_07_nivel
 
 % Carrega a série de previsão harmônica previamente ajustada com o U-Tide 
 % (salva pelo script "bloco1_n1_gapfilling_tide_codiga2011.m"):
-load nivel_boia07_comtide.mat
+load D:\Hatsue\artigos_de_projetos\Sapura_RN_previsao\analises_de_dados\DADO_nivel_boia07_comtide.mat
+
+% Define o tamanho do vetor de dados (no tempo) para trabalhar:
+tamanho_tempo_total = length(dados(:,7));
 
 %% Definição de parâmetros e variáveis
 %
