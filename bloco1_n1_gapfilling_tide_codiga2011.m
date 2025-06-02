@@ -59,8 +59,8 @@ clc
 data_dir = 'C:/Users/SEU_NOME/SEUS_DADOS/';
 
 % Define o nome do arquivo de dados:
-nome_arquivo = 'nomedoarquivo.mat'; % .mat, .txt, etc
-arquivo = fullfile(data_dir, nome_arquivo);
+nomedoarquivo = 'nomedoarquivo.mat'; % .mat, .txt, etc
+arquivo = fullfile(data_dir, nomedoarquivo);
 
 % Verifica se o arquivo existe antes de carregar
 if exist(arquivo, 'file') ~= 2
@@ -75,12 +75,35 @@ if exist(arquivo, 'file') ~= 2
            data_dir, nome_arquivo);
 end
 
-load(arquivo);
+[~, ~, ext] = fileparts(arquivo);
 
-% Organiza o vetor de dados e limpa variável original (SUBSTITUA pelo nome
-% da sua variável do arquivo):
-dados = nomedoarquivo;
-clear nomedoarquivo
+switch lower(ext)
+    case '.mat'
+        % === ATENÇÃO: ===
+        % Este comando carrega a **primeira variável** do arquivo .mat:
+        vars = whos('-file', arquivo);
+        if isempty(vars)
+            error('Arquivo MAT não contém variáveis.');
+        end
+        nome_var = vars(1).name;  % <-- Aqui pega automaticamente a 1ª variável!
+        
+        % => Garanta que essa variável seja a que contém os dados no formato:
+        % DD,MM,YYYY,HH,MM,SS,Nível (metros)
+        % Caso não seja, altere 'vars(1).name' para o nome correto da variável.
+        
+        load(arquivo, nome_var);
+        dados = eval(nome_var);
+        clear(nome_var);
+        
+    case '.txt'
+        % Arquivo .txt: carrega diretamente como matriz numérica.
+        dados = load(arquivo);
+        
+    otherwise
+        error('Formato de arquivo não suportado.');
+end
+
+
 
 % Verificação do formato dos dados lidos:
 % Checa se dados tem pelo menos 7 colunas
@@ -185,7 +208,9 @@ for ii=2:length(duracao_nan_index_global)
     nivel_adcp(ini_nan_index_global(ii):fim_nan_index_global(ii)) = previsao_ajustada;
     
     % Mensagem indicativa de preenchimento realizado:
-    disp(['Preenchimento Harmônico de Maré de ', num2str(ini_nan_index_global(ii)), ' a ', num2str(fim_nan_index_global(ii)), ' (offset direto aplicado)'])
+%     disp(['Preenchimento Harmônico de Maré de ', num2str(ini_nan_index_global(ii)), ' a ', num2str(fim_nan_index_global(ii)), ' (offset direto aplicado)'])
+    fprintf('Preenchimento Harmônico de Maré de %d a %d (offset direto aplicado)\n', ...
+        ini_nan_index_global(ii), fim_nan_index_global(ii));
         
 end
 
