@@ -7,9 +7,12 @@ Este repositório contém os scripts utilizados para o preenchimento de falhas a
 
 ## Estrutura do Repositório
 
-* `scripts/`: Scripts MATLAB para análise e processamento dos dados de nível do mar.
-* `output/`: Arquivos gerados após o processamento (sem dados brutos).
-* `LICENSE`: Termos de licença do pacote U-Tide.
+* `v1.0-original/`: Scripts MATLAB para análise e processamento dos dados de nível do mar, versão original, sem otimizações e melhorias.
+* `v1.0-original/Dados`: Pasta para o usuário colocar os dados a serem processados.
+* `v2.0-original/`: (Recomendada) - Em construção - Versão otimizada e com melhorias da versão 1.0-original.
+* `v2.0-original/Dados`: Pasta para o usuário colocar os dados a serem processados.
+* `U-TIDE/`: Scripts do pacote U-Tide de Codiga (2011), necessários em cada versão do repositório (1.0, 2.0).
+* `U-TIDE/LICENSE`: Termos de licença do pacote U-Tide.
 
 **Importante:** Os dados originais utilizados neste estudo não estão disponibilizados neste repositório por questões legais e de confidencialidade.
 
