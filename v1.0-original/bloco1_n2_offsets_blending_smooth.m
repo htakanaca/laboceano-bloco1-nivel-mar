@@ -1,126 +1,130 @@
 %
 % Bloco 1 - Scripts de Processamento LabOceano
 %
-% Passo 2: Revis√£o de offsets gerados pela previs√£o de mar√© e blending 
+% Passo 2: Revis„o de offsets gerados pela previs„o de marÈ e blending 
 % 
-% Aplica√ß√£o: Dados de N√åVEL DO MAR de ADCP da B√≥ia BH07, na Ba√≠a de 
+% AplicaÁ„o: Dados de NÃVEL DO MAR de ADCP da BÛia BH07, na BaÌa de 
 % Guanabara.
 %
-% Este script realiza a identifica√ß√£o, an√°lise e ajuste de offsets
-% nos dados pr√©-processados, aplicando blending e suaviza√ß√£o para
-% garantir a continuidade e qualidade da s√©rie temporal.
+% Este script realiza a identificaÁ„o, an·lise e ajuste de offsets
+% nos dados prÈ-processados, aplicando blending e suavizaÁ„o para
+% garantir a continuidade e qualidade da sÈrie temporal.
 %
 % Hatsue Takanaca de Decco, 30/05/2025.
 %
-% Contribui√ß√µes de IA:
+% ContribuiÁıes de IA:
 % ------------------------------------------------------------
-% Este script foi desenvolvido com o aux√≠lio da intelig√™ncia
+% Este script foi desenvolvido com o auxÌlio da inteligÍncia
 % artificial ChatGPT (OpenAI) e Grok(xAI), em maio de 2025,
 % e Gemini (Gooogle AI) em junho de 2025. 
-% A l√≥gica foi constru√≠da a partir de instru√ß√µes e ajustes
-% fornecidos pela pesquisadora, garantindo coer√™ncia com os
-% objetivos e crit√©rios do estudo.
+% A lÛgica foi construÌda a partir de instruÁıes e ajustes
+% fornecidos pela pesquisadora, garantindo coerÍncia com os
+% objetivos e critÈrios do estudo.
 %
-% A coautoria simb√≥lica da IA √© reconhecida no aspecto t√©cnico,
-% sem implicar autoria cient√≠fica ou responsabilidade intelectual.
+% A coautoria simbÛlica da IA È reconhecida no aspecto tÈcnico,
+% sem implicar autoria cientÌfica ou responsabilidade intelectual.
 % ------------------------------------------------------------
 %
-% Dados de N√≠vel do Mar (metros):
-% - Frequ√™ncia amostral: 5 minutos.
-% - Per√≠odo: conforme arquivo de entrada.
+% Dados de NÌvel do Mar (metros):
+% - FrequÍncia amostral: 5 minutos.
+% - PerÌodo: conforme arquivo de entrada.
 %
-% ATEN√á√ÉO:
-% - Este script deve ser executado ap√≥s o preenchimento das falhas
-%   amostrais com o m√©todo harm√¥nico (ex: U-Tide).
+% ATEN«√O:
+% - Este script deve ser executado apÛs o preenchimento das falhas
+%   amostrais com o mÈtodo harmÙnico (ex: U-Tide).
 % - Os dados devem estar organizados com NaNs para as lacunas.
 %
 
 clear
 clc
 
-%% Abertura e Organiza√ß√£o dos dados
+%% Abertura e OrganizaÁ„o dos dados
 
-% === CONFIGURA√á√ÉO DO USU√ÅRIO ===
-% Defina aqui o nome do arquivo onde est√£o os dados originais, que
-% ainda cont√©m falhas amostrais, para serem preenchidos:
+% === CONFIGURA«√O DO USU¡RIO ===
+% Defina aqui o nome do arquivo onde est„o os dados originais, que
+% ainda contÈm falhas amostrais, para serem preenchidos:
 nomedoarquivo = 'Estacao_Guanabara_BH_Boia_07_nivel.txt'; % .mat, .txt, etc
-% Nome da s√©rie de previs√£o harm√¥nica previamente ajustada com o U-Tide 
-% (salva pelo script "bloco1_n1_gapfilling_tide_codiga2011.m"):
-arquivo_b1n1 = fullfile(data_dir_b1n1, 'nivel_adcp_comtide.mat');
+
+nomedoarquivo_b1n1 = 'nivel_adcp_comtide.mat';
+
+% === FIM DA CONFIGURA«√O DO USU¡RIO ===
 
 
 
 % Obtendo o caminho completo do script atual:
 current_script_path = mfilename('fullpath');
 
-% Extraindo apenas o diret√≥rio onde o script est√° localizado:
+% Extraindo apenas o diretÛrio onde o script est· localizado:
 [script_dir, ~, ~] = fileparts(current_script_path);
 
-% Definindo o diret√≥rio de dados em rela√ß√£o √† pasta do script:
+% Definindo o diretÛrio de dados em relaÁ„o ‡ pasta do script:
 % Dados na subpasta 'Dados', dentro da pasta do script:
 data_dir = fullfile(script_dir, 'Dados');
+% Defina aqui o caminho para o diretÛrio onde est· o arquivo da sÈrie de 
+% previs„o harmÙnica previamente ajustada com o U-Tide 
+% (salva pelo script "bloco1_n1_gapfilling_tide_codiga2011.m")
+data_dir_b1n1 = data_dir;
 
 % Define o nome do arquivo de dados:
 arquivo = fullfile(data_dir, nomedoarquivo);
+% Nome do arquivo da sÈrie de de dados preenchidos com previs„o harmÙnica 
+% com o U-Tide 
+% (salva pelo script "bloco1_n1_gapfilling_tide_codiga2011.m"):
+arquivo_b1n1 = fullfile(data_dir_b1n1, nomedoarquivo_b1n1);
 
 % Verifica se o arquivo existe antes de carregar
 if exist(arquivo, 'file') ~= 2
     error(['\n\n' ...
            '******************************\n' ...
-           '***       ATEN√á√ÉO!         ***\n' ...
+           '***       ATEN«√O!         ***\n' ...
            '******************************\n' ...
            '\n' ...
-           'ARQUIVO N√ÉO ENCONTRADO!\n\n' ...
-           'Verifique se o diret√≥rio est√° correto:\n  %s\n\n' ...
-           'E se o nome do arquivo est√° correto:\n  %s\n\n'], ...
-           data_dir, nome_arquivo);
+           'ARQUIVO N√O ENCONTRADO!\n\n' ...
+           'Verifique se o diretÛrio est· correto:\n  %s\n\n' ...
+           'E se o nome do arquivo est· correto:\n  %s\n\n'], ...
+           data_dir, nomedoarquivo);
 end
 
 [~, ~, ext] = fileparts(arquivo);
 
 switch lower(ext)
     case '.mat'
-        % === ATEN√á√ÉO: ===
-        % Este comando carrega a **primeira vari√°vel** do arquivo .mat:
+        % === ATEN«√O: ===
+        % Este comando carrega a **primeira vari·vel** do arquivo .mat:
         vars = whos('-file', arquivo);
         if isempty(vars)
-            error('Arquivo MAT n√£o cont√©m vari√°veis.');
+            error('Arquivo MAT n„o contÈm vari·veis.');
         end
-        nome_var = vars(1).name;  % <-- Aqui pega automaticamente a 1¬™ vari√°vel!
+        nome_var = vars(1).name;  % <-- Aqui pega automaticamente a 1™ vari·vel!
         
-        % => Garanta que essa vari√°vel seja a que cont√©m os dados no formato:
-        % DD,MM,YYYY,HH,MM,SS,N√≠vel (metros)
-        % Caso n√£o seja, altere 'vars(1).name' para o nome correto da vari√°vel.
+        % => Garanta que essa vari·vel seja a que contÈm os dados no formato:
+        % DD,MM,YYYY,HH,MM,SS,NÌvel (metros)
+        % Caso n„o seja, altere 'vars(1).name' para o nome correto da vari·vel.
         
         load(arquivo, nome_var);
         dados = eval(nome_var);
         clear(nome_var);
         
     case '.txt'
-        % Arquivo .txt: carrega diretamente como matriz num√©rica.
+        % Arquivo .txt: carrega diretamente como matriz numÈrica.
         dados = load(arquivo);
         
     otherwise
-        error('Formato de arquivo n√£o suportado.');
+        error('Formato de arquivo n„o suportado.');
 end
 
 
-
-% Defina aqui o caminho para o diret√≥rio onde est√° o arquivo da s√©rie de 
-% previs√£o harm√¥nica previamente ajustada com o U-Tide 
-% (salva pelo script "bloco1_n1_gapfilling_tide_codiga2011.m")
-data_dir_b1n1 = 'C:/Users/SEU_NOME/SEUS_DADOS/';
 
 % Verifica se o arquivo existe antes de carregar
 if exist(arquivo_b1n1, 'file') ~= 2
     error(['\n\n' ...
            '******************************\n' ...
-           '***       ATEN√á√ÉO!         ***\n' ...
+           '***       ATEN«√O!         ***\n' ...
            '******************************\n' ...
            '\n' ...
-           'ARQUIVO N√ÉO ENCONTRADO!\n\n' ...
-           'Verifique se o diret√≥rio est√° correto:\n  %s\n\n' ...
-           'E se o nome do arquivo est√° correto:\n  %s\n\n'], ...
+           'ARQUIVO N√O ENCONTRADO!\n\n' ...
+           'Verifique se o diretÛrio est· correto:\n  %s\n\n' ...
+           'E se o nome do arquivo est· correto:\n  %s\n\n'], ...
            data_dir_b1n1, arquivo_b1n1);
 end
 
@@ -129,99 +133,99 @@ load(arquivo_b1n1);
 % Define o tamanho do vetor de dados (no tempo) para trabalhar:
 tamanho_tempo_total = length(dados(:,7));
 
-%% Defini√ß√£o de par√¢metros e vari√°veis
+%% DefiniÁ„o de par‚metros e vari·veis
 %
-% Identifica√ß√£o dos pontos de falhas amostrais originais para rastrear
-% os pontos do vetor de n√≠vel do mar em que a previs√£o de mar√© inserida
+% IdentificaÁ„o dos pontos de falhas amostrais originais para rastrear
+% os pontos do vetor de nÌvel do mar em que a previs„o de marÈ inserida
 % gerou offsets.
 %
 
-% Identifica os pontos onde a s√©rie apresenta lacunas (NaNs):
+% Identifica os pontos onde a sÈrie apresenta lacunas (NaNs):
 marca_nan=isnan(dados(:,7));
 
-% Adiciona um zero no final para facilitar a detec√ß√£o de bordas de blocos 
-% de NaN e evitar erro no c√°lculo de diferen√ßas, garantindo vetor como 
+% Adiciona um zero no final para facilitar a detecÁ„o de bordas de blocos 
+% de NaN e evitar erro no c·lculo de diferenÁas, garantindo vetor como 
 % linha:
 marca_nan(end+1)=0;
 marca_nan=marca_nan';
 
-% Calcula a diferen√ßa entre elementos consecutivos para identificar as 
-% transi√ß√µes entre dados e NaNs:
-% Onde diff = 1, come√ßa uma falha; onde diff = -1, termina.
+% Calcula a diferenÁa entre elementos consecutivos para identificar as 
+% transiÁıes entre dados e NaNs:
+% Onde diff = 1, comeÁa uma falha; onde diff = -1, termina.
 diff_marca_nan(1:length(marca_nan))=zeros;
 diff_marca_nan(2:end)=diff(marca_nan);
 
-% Ajuste para garantir que o primeiro elemento do vetor de diferen√ßas 
+% Ajuste para garantir que o primeiro elemento do vetor de diferenÁas 
 % esteja corretamente inicializado:
-% (Se a s√©rie come√ßa com dado (e n√£o NaN), √© 0)
+% (Se a sÈrie comeÁa com dado (e n„o NaN), È 0)
 diff_marca_nan(1)=0;
 
-% Localiza os √≠ndices onde come√ßam os blocos de NaNs (falhas):
-% O preenchimento do vetor ini_nan_index_global come√ßa a partir da posi√ß√£o 
-% 2, para evitar erros se a s√©rie come√ßar com NaN.
+% Localiza os Ìndices onde comeÁam os blocos de NaNs (falhas):
+% O preenchimento do vetor ini_nan_index_global comeÁa a partir da posiÁ„o 
+% 2, para evitar erros se a sÈrie comeÁar com NaN.
 xx=find(diff_marca_nan==1);
 ini_nan_index_global(2:length(xx)+1)=xx;
 
-%  Identifica os √≠ndices finais das falhas, ajustando para referenciar o 
-% √∫ltimo √≠ndice de NaN antes do retorno aos dados v√°lidos:
+%  Identifica os Ìndices finais das falhas, ajustando para referenciar o 
+% ˙ltimo Ìndice de NaN antes do retorno aos dados v·lidos:
 xx=find(diff_marca_nan==-1);
 fim_nan_index_global(2:length(xx)+1)=xx-1;
 
-%Calcula a dura√ß√£o de cada bloco de NaN (lacuna) detectada:
+%Calcula a duraÁ„o de cada bloco de NaN (lacuna) detectada:
 duracao_nan_index_global=fim_nan_index_global-ini_nan_index_global;
 
-% Extrai a s√©rie de n√≠vel do mar original, da coluna 7, para uma vari√°vel 
+% Extrai a sÈrie de nÌvel do mar original, da coluna 7, para uma vari·vel 
 % direta:
 nivel_adcp=dados(:,7);
 
-% Guarda uma c√≥pia da previs√£o harm√¥nica original para posterior 
-% compara√ß√£o com a vers√£o suavizada:
+% Guarda uma cÛpia da previs„o harmÙnica original para posterior 
+% comparaÁ„o com a vers„o suavizada:
 nivel_adcp_comtide_raw = nivel_adcp_comtide; 
 
 %% Blending nas bordas das lacunas
 %
-% Define quantos pontos ser√£o usados em cada borda para realizar a 
-% transi√ß√£o gradual entre observa√ß√£o e previs√£o, minimizando 
+% Define quantos pontos ser„o usados em cada borda para realizar a 
+% transiÁ„o gradual entre observaÁ„o e previs„o, minimizando 
 % descontinuidades:
 n_blend = 3;
 
 
-% Loop sobre todas as lacunas detectadas, come√ßando da segunda posi√ß√£o, 
+% Loop sobre todas as lacunas detectadas, comeÁando da segunda posiÁ„o, 
 % para evitar problemas em bordas iniciais:
 for ii=2:length(duracao_nan_index_global)
     
     
-    % Define √≠ndices de in√≠cio e fim da lacuna atual:
+    % Define Ìndices de inÌcio e fim da lacuna atual:
     idx_ini = ini_nan_index_global(ii);
     idx_fim = fim_nan_index_global(ii);
     
     % Blending na borda inicial (antes da lacuna)
-    % Garante que h√° dados suficientes antes da lacuna para aplicar o 
+    % Garante que h· dados suficientes antes da lacuna para aplicar o 
     % blending:
     if idx_ini - n_blend >= 1
         % Se houver dados suficientes antes da lacuna para aplicar o 
         % blending, separa borda_obs (dados imediatamente antes da lacuna) 
-        % e borda_pred (dados previstos ap√≥s a lacuna):
+        % e borda_pred (dados previstos apÛs a lacuna):
         borda_obs = nivel_adcp_comtide(idx_ini - n_blend : idx_ini - 1);
         borda_pred = nivel_adcp_comtide(idx_ini : idx_ini + n_blend - 1);
-        % Realiza interpola√ß√£o linear progressiva entre as bordas, 
-        % suavizando a transi√ß√£o para evitar saltos abruptos:
+        % Realiza interpolaÁ„o linear progressiva entre as bordas, 
+        % suavizando a transiÁ„o para evitar saltos abruptos:
         for jj = 1:n_blend
             w = jj / (n_blend + 1);
             nivel_adcp_comtide(idx_ini - 1 + jj) = (1 - w) * borda_obs(jj) + w * borda_pred(jj);
         end
     end
 
-    % Blending na borda final (ap√≥s a lacuna)
-    % Garante que h√° pontos suficientes ap√≥s a lacuna para aplicar o 
+    % Blending na borda final (apÛs a lacuna)
+    % Garante que h· pontos suficientes apÛs a lacuna para aplicar o 
     % blending:
     if idx_fim + n_blend <= length(nivel_adcp_comtide)
-        % Extrai bordas para suaviza√ß√£o: borda_pred (antes do fim da 
-        % lacuna) e borda_obs (imediatamente ap√≥s a lacuna):
+        % Extrai bordas para suavizaÁ„o: borda_pred (antes do fim da 
+        % lacuna) e borda_obs (imediatamente apÛs a lacuna):
         borda_pred = nivel_adcp_comtide(idx_fim - n_blend + 1 : idx_fim);
         borda_obs = nivel_adcp_comtide(idx_fim + 1 : idx_fim + n_blend);
-        % Aplica blending progressivo na borda final, com mesma l√≥gica de 
-        % suaviza√ß√£o linear:
+        % Aplica blending progressivo na borda final, com mesma lÛgica de 
+        % suavizaÁ„o linear:
         for jj = 1:n_blend
             w = jj / (n_blend + 1);
             nivel_adcp_comtide(idx_fim - n_blend + jj) = (1 - w) * borda_pred(jj) + w * borda_obs(jj);
@@ -229,35 +233,35 @@ for ii=2:length(duracao_nan_index_global)
     end
 end
 
-%% Segunda suaviza√ß√£o p√≥s-blending (para garantir suaviza√ß√£o mais homog√™nea para as v√°rias lacunas)
+%% Segunda suavizaÁ„o pÛs-blending (para garantir suavizaÁ„o mais homogÍnea para as v·rias lacunas)
 
-% Define largura da janela para aplicar m√©dia m√≥vel ap√≥s o blending, 
-% promovendo suaviza√ß√£o adicional e eliminando eventuais artefatos
-% (√≠mpar de prefer√™ncia):
+% Define largura da janela para aplicar mÈdia mÛvel apÛs o blending, 
+% promovendo suavizaÁ„o adicional e eliminando eventuais artefatos
+% (Ìmpar de preferÍncia):
 win_movmean = 3;
 
-% Cria c√≥pia da s√©rie j√° com blending, para aplicar a suaviza√ß√£o final 
+% Cria cÛpia da sÈrie j· com blending, para aplicar a suavizaÁ„o final 
 % sem sobrescrever:
 nivel_adcp_suave = nivel_adcp_comtide;  
 
-% Aplica suaviza√ß√£o em todas as lacunas detectadas:
+% Aplica suavizaÁ„o em todas as lacunas detectadas:
 for ii = 2:length(duracao_nan_index_global)
     
     idx_ini = ini_nan_index_global(ii);
     idx_fim = fim_nan_index_global(ii);
     
-    % Suaviza√ß√£o borda inicial
-    % Seleciona o trecho inicial ap√≥s a lacuna e aplica filtro de 
-    % m√©dia m√≥vel:
+    % SuavizaÁ„o borda inicial
+    % Seleciona o trecho inicial apÛs a lacuna e aplica filtro de 
+    % mÈdia mÛvel:
     trecho_ini = nivel_adcp_suave(idx_ini : idx_ini + win_movmean - 1);
     media_ini = filter(ones(1, win_movmean)/win_movmean, 1, trecho_ini);
-    % Ajusta a sa√≠da do filtro para compensar o atraso introduzido pelo 
+    % Ajusta a saÌda do filtro para compensar o atraso introduzido pelo 
     % filtro causal:
     nivel_adcp_suave(idx_ini : idx_ini + win_movmean - 1) = ...
         [trecho_ini(1:win_movmean-1); media_ini(win_movmean:end)];
     
-    % Suaviza√ß√£o borda final
-    % Repete o mesmo processo na borda final, garantindo transi√ß√£o 
+    % SuavizaÁ„o borda final
+    % Repete o mesmo processo na borda final, garantindo transiÁ„o 
     % suave e sem descontinuidades:
     trecho_fim = nivel_adcp_suave(idx_fim - win_movmean + 1 : idx_fim);
     media_fim = filter(ones(1, win_movmean)/win_movmean, 1, trecho_fim);
@@ -265,7 +269,7 @@ for ii = 2:length(duracao_nan_index_global)
         [trecho_fim(1:win_movmean-1); media_fim(win_movmean:end)];
 end
 
-%% Salva as vari√°veis
+%% Salva as vari·veis
 
 % Formato .mat:
 save ('nivel_adcp_suave.mat','nivel_adcp_suave');
@@ -274,13 +278,13 @@ save ('nivel_adcp_suave.mat','nivel_adcp_suave');
 dados_suavizados = dados(1:tamanho_tempo_total,1:6);
 dados_suavizados(:,7) = nivel_adcp_suave;
 
-% Sem cabe√ßalho:
+% Sem cabeÁalho:
 % dlmwrite('nivel_adcp_suave.csv', dados_suavizados, 'delimiter', ',', 'precision', 6);
 
 filename = 'nivel_adcp_suave.csv';
 fid = fopen(filename, 'w');
 
-% Escreve o cabe√ßalho
+% Escreve o cabeÁalho
 fprintf(fid, 'DD;MM;YYYY;HH;MM;SS;Nivel(m)\n');
 
 % Escreve os dados com separador ';' e 4 casas decimais
@@ -293,55 +297,55 @@ end
 
 fclose(fid);
 
-%% Plotagem para inspe√ß√£o visual
+%% Plotagem para inspeÁ„o visual
 %
-% --- Plots: original, previs√£o harm√¥nica, e previs√£o suavizada ---
+% --- Plots: original, previs„o harmÙnica, e previs„o suavizada ---
 
 % Inicializa figura, limpando qualquer plot anterior:
 figure(1)
 clf
 hold on
 
-% Plota todas as s√©ries relevantes, cada uma com cor distinta e legenda, 
-% permitindo compara√ß√£o direta entre os diferentes est√°gios do 
+% Plota todas as sÈries relevantes, cada uma com cor distinta e legenda, 
+% permitindo comparaÁ„o direta entre os diferentes est·gios do 
 % processamento
 
 % Sinal original (com NaNs):
-plot(nivel_adcp, 'k', 'DisplayName', 'S√©rie original')
+plot(nivel_adcp, 'k', 'DisplayName', 'SÈrie original')
 
-% Previs√£o harm√¥nica antes do blending:
-plot(nivel_adcp_comtide_raw, 'b', 'DisplayName', 'Previs√£o harm√¥nica (raw)')
+% Previs„o harmÙnica antes do blending:
+plot(nivel_adcp_comtide_raw, 'b', 'DisplayName', 'Previs„o harmÙnica (raw)')
 
-% Previs√£o harm√¥nica suavizada (com blending):
-plot(nivel_adcp_comtide, 'm', 'LineWidth', 1.2, 'DisplayName', 'Previs√£o com blending')
+% Previs„o harmÙnica suavizada (com blending):
+plot(nivel_adcp_comtide, 'm', 'LineWidth', 1.2, 'DisplayName', 'Previs„o com blending')
 
-% Previs√£o harm√¥nica p√≥s-suaviza√ß√£o com blending:
-plot(nivel_adcp_suave, 'c', 'LineWidth', 1.2, 'DisplayName', 'Previs√£o com blending e p√≥s-suaviza√ß√£o')
+% Previs„o harmÙnica pÛs-suavizaÁ„o com blending:
+plot(nivel_adcp_suave, 'c', 'LineWidth', 1.2, 'DisplayName', 'Previs„o com blending e pÛs-suavizaÁ„o')
 
-% Legenda e t√≠tulo:
+% Legenda e tÌtulo:
 legend('Location', 'best')
-title('Preenchimento de lacunas com U-Tide e suaviza√ß√£o por blending')
-xlabel('Tempo (√≠ndice)')
-ylabel('N√≠vel do mar (m)')
+title('Preenchimento de lacunas com U-Tide e suavizaÁ„o por blending')
+xlabel('Tempo (Ìndice)')
+ylabel('NÌvel do mar (m)')
 grid on
 box on
 
 
-% Define uma lacuna espec√≠fica para zoom e inspe√ß√£o detalhada da 
+% Define uma lacuna especÌfica para zoom e inspeÁ„o detalhada da 
 % qualidade do preenchimento:
 
 % Dica: para inspecionar outra lacuna, basta mudar o valor de 'indice_lacuna_plot' 
-% e rodar novamente este bloco de c√≥digo:
+% e rodar novamente este bloco de cÛdigo:
 % =================================
 indice_lacuna_plot = 9;
-% Zoom autom√°tico na primeira lacuna para inspe√ß√£o de spike
+% Zoom autom·tico na primeira lacuna para inspeÁ„o de spike
 idx_zoom = ini_nan_index_global(indice_lacuna_plot);  % primeira lacuna
 range_zoom = idx_zoom - 100 : idx_zoom + 100;
 xlim([range_zoom(1) range_zoom(end)])
 % =================================
 
-% Sugest√£o de comando para salvar a figura com qualidade alta para 
-% relat√≥rios ou apresenta√ß√µes:
+% Sugest„o de comando para salvar a figura com qualidade alta para 
+% relatÛrios ou apresentaÁıes:
 % print('nivel_mar_blending_zoom','-dpng','-r300')
 
 
