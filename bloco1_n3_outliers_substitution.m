@@ -16,7 +16,7 @@
 % Contribuições de IA:
 % ------------------------------------------------------------
 % Este script foi desenvolvido com o auxílio da inteligência
-% artificial ChatGPT (OpenAI), em maio e junho de 2025.
+% artificial ChatGPT (OpenAI) e Grok (xAI), em maio e junho de 2025.
 % A lógica foi construída a partir de instruções e ajustes
 % fornecidos pela pesquisadora, garantindo coerência com os
 % objetivos e critérios do estudo.
@@ -48,13 +48,28 @@ clc
 %% Abertura e Organização dos dados
 
 % === CONFIGURAÇÃO DO USUÁRIO ===
-% Defina aqui o caminho para o diretório onde estão os dados originais, que
-% ainda contém falhas amostrais, para fins de comparação posterior:
-data_dir = 'C:/Users/SEU_NOME/SEUS_DADOS/';
+% Defina aqui o nome do arquivo onde estão os dados originais, que
+% ainda contém falhas amostrais, para serem preenchidos:
+nomedoarquivo = 'Estacao_Guanabara_BH_Boia_07_nivel.txt'; % .mat, .txt, etc
+% Nome da série de previsão harmônica previamente ajustada com o U-Tide 
+% (salva pelo script "bloco1_n2_offsets_blending_smooth.m"):
+arquivo_b1n2 = fullfile(data_dir_b1n1, 'nivel_adcp_suave.mat');
+
+
+
+
+% Obtendo o caminho completo do script atual:
+current_script_path = mfilename('fullpath');
+
+% Extraindo apenas o diretório onde o script está localizado:
+[script_dir, ~, ~] = fileparts(current_script_path);
+
+% Definindo o diretório de dados em relação à pasta do script:
+% Dados na subpasta 'Dados', dentro da pasta do script:
+data_dir = fullfile(script_dir, 'Dados');
 
 % Define o nome do arquivo de dados:
-nome_arquivo = 'nomedoarquivo.mat'; % .mat, .txt, etc
-arquivo = fullfile(data_dir, nome_arquivo);
+arquivo = fullfile(data_dir, nomedoarquivo);
 
 % Verifica se o arquivo existe antes de carregar
 if exist(arquivo, 'file') ~= 2
@@ -97,16 +112,6 @@ switch lower(ext)
         error('Formato de arquivo não suportado.');
 end
 
-
-% Defina aqui o caminho para o diretório onde está o arquivo da série com 
-% lacunas de dados preenchidas com previsão do U-Tide e após o blending e 
-% suavização de offsets
-% (salva pelo script "bloco1_n2_offsets_blending_smooth.m"):
-data_dir_b1n2 = 'C:/Users/SEU_NOME/SEUS_DADOS/';
-
-% Carrega a série:
-arquivo_b1n2 = fullfile(data_dir_b1n2, 'nivel_adcp_suave.mat');
-
 % Verifica se o arquivo existe antes de carregar
 if exist(arquivo_b1n2, 'file') ~= 2
     error(['\n\n' ...
@@ -117,7 +122,7 @@ if exist(arquivo_b1n2, 'file') ~= 2
            'ARQUIVO NÃO ENCONTRADO!\n\n' ...
            'Verifique se o diretório está correto:\n  %s\n\n' ...
            'E se o nome do arquivo está correto:\n  %s\n\n'], ...
-           data_dir_b1n2, arquivo_b1n2);
+           data_dir, arquivo_b1n2);
 end
 
 load(arquivo_b1n2);
