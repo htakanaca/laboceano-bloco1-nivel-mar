@@ -14,7 +14,8 @@
 % Contribuições de IA: 
 % ------------------------------------------------------------
 % Este script foi desenvolvido com o auxílio das inteligências
-% artificial ChatGPT (OpenAI) e Grok (xAI), em maio de 2025.
+% artificial ChatGPT (OpenAI) e Grok (xAI), em maio de 2025,
+% e Gemini (Gooogle AI) em junho de 2025. 
 % A lógica foi construída a partir de instruções e ajustes
 % fornecidos pela pesquisadora, garantindo coerência com os
 % objetivos e critérios do estudo.
