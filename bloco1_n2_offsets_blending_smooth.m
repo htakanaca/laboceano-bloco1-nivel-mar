@@ -44,7 +44,7 @@ clc
 % ainda contém falhas amostrais, para serem preenchidos:
 nomedoarquivo = 'Estacao_Guanabara_BH_Boia_07_nivel.txt'; % .mat, .txt, etc
 % Nome da série de previsão harmônica previamente ajustada com o U-Tide 
-% (salva pelo script "bloco1_c1_gapfilling_tide_codiga2011.m"):
+% (salva pelo script "bloco1_n1_gapfilling_tide_codiga2011.m"):
 arquivo_b1n1 = fullfile(data_dir_b1n1, 'nivel_adcp_comtide.mat');
 
 
