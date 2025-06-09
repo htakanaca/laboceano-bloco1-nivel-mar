@@ -6,7 +6,7 @@ Este repositório contém os scripts utilizados para o preenchimento de falhas a
 **VERSÃO 2.0: Scripts originais COM otimizações ou melhorias.**
 ---
 
-## Estrutura da Versão 1.0:
+## Estrutura da Versão 2.0:
 
 * `Dados/`: Scripts MATLAB para análise e processamento dos dados de nível do mar.
 
