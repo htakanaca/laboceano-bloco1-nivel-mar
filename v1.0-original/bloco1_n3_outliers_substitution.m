@@ -1,60 +1,57 @@
 %
 % Bloco 1 - Scripts de Processamento LabOceano
 %
-% Passo 3: Detec√ß√£o e Substitui√ß√£o de Outliers dos dados, ap√≥s o 
+% Passo 3: DetecÁ„o e SubstituiÁ„o de Outliers dos dados, apÛs o 
 % preenchimento de falhas. 
 % 
-% Aplica√ß√£o: Dados de N√åVEL DO MAR de ADCP da B√≥ia BH07, na Ba√≠a de 
+% AplicaÁ„o: Dados de NÃVEL DO MAR de ADCP da BÛia BH07, na BaÌa de 
 % Guanabara.
 %
-% Este script realiza a detec√ß√£o e substitui√ß√£o de outliers nos dados 
-% pr√©-processados, utilizando an√°lise de derivadas e ajuste local com 
-% valores m√©dios, garantindo a continuidade e qualidade da s√©rie temporal.
+% Este script realiza a detecÁ„o e substituiÁ„o de outliers nos dados 
+% prÈ-processados, utilizando an·lise de derivadas e ajuste local com 
+% valores mÈdios, garantindo a continuidade e qualidade da sÈrie temporal.
 %
 % Hatsue Takanaca de Decco, Junho/2025.
 %
-% Contribui√ß√µes de IA:
+% ContribuiÁıes de IA:
 % ------------------------------------------------------------
-% Este script foi desenvolvido com o aux√≠lio da intelig√™ncia
+% Este script foi desenvolvido com o auxÌlio da inteligÍncia
 % artificial ChatGPT (OpenAI) e Grok (xAI), em maio e junho de 2025,
 % e Gemini (Gooogle AI) em junho de 2025. 
-% A l√≥gica foi constru√≠da a partir de instru√ß√µes e ajustes
-% fornecidos pela pesquisadora, garantindo coer√™ncia com os
-% objetivos e crit√©rios do estudo.
+% A lÛgica foi construÌda a partir de instruÁıes e ajustes
+% fornecidos pela pesquisadora, garantindo coerÍncia com os
+% objetivos e critÈrios do estudo.
 %
-% A coautoria simb√≥lica da IA √© reconhecida no aspecto t√©cnico,
-% sem implicar autoria cient√≠fica ou responsabilidade intelectual.
+% A coautoria simbÛlica da IA È reconhecida no aspecto tÈcnico,
+% sem implicar autoria cientÌfica ou responsabilidade intelectual.
 % ------------------------------------------------------------
 %
-% Dados de N√≠vel do Mar (metros):
-% - Frequ√™ncia amostral: 5 minutos.
-% - Per√≠odo: conforme arquivo de entrada.
+% Dados de NÌvel do Mar (metros):
+% - FrequÍncia amostral: 5 minutos.
+% - PerÌodo: conforme arquivo de entrada.
 %
-% ATEN√á√ÉO:
+% ATEN«√O:
 %
-% - A defini√ß√£o de outlier e o fator limiar devem ser calibrados conforme  
-% as caracter√≠sticas da s√©rie analisada.
+% - A definiÁ„o de outlier e o fator limiar devem ser calibrados conforme  
+% as caracterÌsticas da sÈrie analisada.
 %
 % ETAPA DO FLUXOGRAMA:
-% P√≥s-processamento (etapa 3) - Deve ser executado AP√ìS:
+% PÛs-processamento (etapa 3) - Deve ser executado AP”S:
 %   1. Preenchimento de falhas com U-Tide 
 %      (bloco1_n1_gapfilling_tide_codiga2011.m)
-%   2. Blending/suaviza√ß√£o de offsets 
+%   2. Blending/suavizaÁ„o de offsets 
 %      (bloco1_n2_offsets_blending_smooth.m)
 %
 
 clear
 clc
 
-%% Abertura e Organiza√ß√£o dos dados
+%% Abertura e OrganizaÁ„o dos dados
 
-% === CONFIGURA√á√ÉO DO USU√ÅRIO ===
-% Defina aqui o nome do arquivo onde est√£o os dados originais, que
-% ainda cont√©m falhas amostrais, para serem preenchidos:
+% === CONFIGURA«√O DO USU¡RIO ===
+% Defina aqui o nome do arquivo onde est„o os dados originais, que
+% ainda contÈm falhas amostrais, para serem preenchidos:
 nomedoarquivo = 'Estacao_Guanabara_BH_Boia_07_nivel.txt'; % .mat, .txt, etc
-% Nome da s√©rie de previs√£o harm√¥nica previamente ajustada com o U-Tide 
-% (salva pelo script "bloco1_n2_offsets_blending_smooth.m"):
-arquivo_b1n2 = fullfile(data_dir_b1n1, 'nivel_adcp_suave.mat');
 
 
 
@@ -62,26 +59,29 @@ arquivo_b1n2 = fullfile(data_dir_b1n1, 'nivel_adcp_suave.mat');
 % Obtendo o caminho completo do script atual:
 current_script_path = mfilename('fullpath');
 
-% Extraindo apenas o diret√≥rio onde o script est√° localizado:
+% Extraindo apenas o diretÛrio onde o script est· localizado:
 [script_dir, ~, ~] = fileparts(current_script_path);
 
-% Definindo o diret√≥rio de dados em rela√ß√£o √† pasta do script:
+% Definindo o diretÛrio de dados em relaÁ„o ‡ pasta do script:
 % Dados na subpasta 'Dados', dentro da pasta do script:
 data_dir = fullfile(script_dir, 'Dados');
 
 % Define o nome do arquivo de dados:
 arquivo = fullfile(data_dir, nomedoarquivo);
+% Nome da sÈrie de previs„o harmÙnica previamente ajustada com o U-Tide 
+% (salva pelo script "bloco1_n2_offsets_blending_smooth.m"):
+arquivo_b1n2 = fullfile(data_dir, 'nivel_adcp_suave.mat');
 
 % Verifica se o arquivo existe antes de carregar
 if exist(arquivo, 'file') ~= 2
     error(['\n\n' ...
            '******************************\n' ...
-           '***       ATEN√á√ÉO!         ***\n' ...
+           '***       ATEN«√O!         ***\n' ...
            '******************************\n' ...
            '\n' ...
-           'ARQUIVO N√ÉO ENCONTRADO!\n\n' ...
-           'Verifique se o diret√≥rio est√° correto:\n  %s\n\n' ...
-           'E se o nome do arquivo est√° correto:\n  %s\n\n'], ...
+           'ARQUIVO N√O ENCONTRADO!\n\n' ...
+           'Verifique se o diretÛrio est· correto:\n  %s\n\n' ...
+           'E se o nome do arquivo est· correto:\n  %s\n\n'], ...
            data_dir, nome_arquivo);
 end
 
@@ -89,110 +89,110 @@ end
 
 switch lower(ext)
     case '.mat'
-        % === ATEN√á√ÉO: ===
-        % Este comando carrega a **primeira vari√°vel** do arquivo .mat:
+        % === ATEN«√O: ===
+        % Este comando carrega a **primeira vari·vel** do arquivo .mat:
         vars = whos('-file', arquivo);
         if isempty(vars)
-            error('Arquivo MAT n√£o cont√©m vari√°veis.');
+            error('Arquivo MAT n„o contÈm vari·veis.');
         end
-        nome_var = vars(1).name;  % <-- Aqui pega automaticamente a 1¬™ vari√°vel!
+        nome_var = vars(1).name;  % <-- Aqui pega automaticamente a 1™ vari·vel!
         
-        % => Garanta que essa vari√°vel seja a que cont√©m os dados no formato:
-        % DD,MM,YYYY,HH,MM,SS,N√≠vel (metros)
-        % Caso n√£o seja, altere 'vars(1).name' para o nome correto da vari√°vel.
+        % => Garanta que essa vari·vel seja a que contÈm os dados no formato:
+        % DD,MM,YYYY,HH,MM,SS,NÌvel (metros)
+        % Caso n„o seja, altere 'vars(1).name' para o nome correto da vari·vel.
         
         load(arquivo, nome_var);
         dados = eval(nome_var);
         clear(nome_var);
         
     case '.txt'
-        % Arquivo .txt: carrega diretamente como matriz num√©rica.
+        % Arquivo .txt: carrega diretamente como matriz numÈrica.
         dados = load(arquivo);
         
     otherwise
-        error('Formato de arquivo n√£o suportado.');
+        error('Formato de arquivo n„o suportado.');
 end
 
 % Verifica se o arquivo existe antes de carregar
 if exist(arquivo_b1n2, 'file') ~= 2
     error(['\n\n' ...
            '******************************\n' ...
-           '***       ATEN√á√ÉO!         ***\n' ...
+           '***       ATEN«√O!         ***\n' ...
            '******************************\n' ...
            '\n' ...
-           'ARQUIVO N√ÉO ENCONTRADO!\n\n' ...
-           'Verifique se o diret√≥rio est√° correto:\n  %s\n\n' ...
-           'E se o nome do arquivo est√° correto:\n  %s\n\n'], ...
+           'ARQUIVO N√O ENCONTRADO!\n\n' ...
+           'Verifique se o diretÛrio est· correto:\n  %s\n\n' ...
+           'E se o nome do arquivo est· correto:\n  %s\n\n'], ...
            data_dir, arquivo_b1n2);
 end
 
 load(arquivo_b1n2);
 
-%% Defini√ß√£o de par√¢metros e vari√°veis auxiliares:
+%% DefiniÁ„o de par‚metros e vari·veis auxiliares:
 %
-% Explica√ß√£o sobre o m√©todo para entendimento das vari√°veis a seguir:
+% ExplicaÁ„o sobre o mÈtodo para entendimento das vari·veis a seguir:
 %
-% Toda a s√©rie de n√≠vel do mar √© percorrida para identificar potenciais 
-% Outliers. A s√©rie √© transformada em primeira derivada, pois a defini√ß√£o
-% de Outlier √© dada como uma varia√ß√£o brusca no n√≠vel do mar, provavelmente
-% causada por sinais esp√∫rios ou ondas geradas por passagens de embarca√ß√£o
-% pr√≥ximo ao local de medi√ß√£o do n√≠vel do mar pelo ADCP.
+% Toda a sÈrie de nÌvel do mar È percorrida para identificar potenciais 
+% Outliers. A sÈrie È transformada em primeira derivada, pois a definiÁ„o
+% de Outlier È dada como uma variaÁ„o brusca no nÌvel do mar, provavelmente
+% causada por sinais esp˙rios ou ondas geradas por passagens de embarcaÁ„o
+% prÛximo ao local de mediÁ„o do nÌvel do mar pelo ADCP.
 %
-% Os Outliers s√£o buscados ao longo de toda a s√©rie e testados contra o
-% "fator_limiar". Os elementos identificados como Outliers s√£o substitu√≠dos 
-% por um valor m√©dio entre os valores vizinhos. 
+% Os Outliers s„o buscados ao longo de toda a sÈrie e testados contra o
+% "fator_limiar". Os elementos identificados como Outliers s„o substituÌdos 
+% por um valor mÈdio entre os valores vizinhos. 
 % 
 
-% Renomeia os dados de n√≠vel do mar em um vetor separado:
+% Renomeia os dados de nÌvel do mar em um vetor separado:
 nivel_adcp = dados(:,7);
 
-% Define o fator limiar de varia√ß√£o, acima do qual um ponto ser√° 
+% Define o fator limiar de variaÁ„o, acima do qual um ponto ser· 
 % considerado outlier:
 fator_limiar = 5;  
 
 % Define o tamanho do vetor de dados (no tempo) para trabalhar:
 tamanho_tempo_total = length(dados(:,7));
 
-% Vetor temporal total (base de refer√™ncia):
+% Vetor temporal total (base de referÍncia):
 tempo_total_vetorial = 1:tamanho_tempo_total;
 
-% Tamanho da s√©rie para a substitui√ß√£o de Outliers:
+% Tamanho da sÈrie para a substituiÁ„o de Outliers:
 roda_varredura_outlier = tamanho_tempo_total;
 
 % Inicializa contador de outliers:
 conta_outliers_nivel = 1;
 
-% Cria a vari√°vel de trabalho dos outliers:
+% Cria a vari·vel de trabalho dos outliers:
 nivel_adcp = nivel_adcp_suave;
 
-% C√≥pia do original para compara√ß√£o posterior:
+% CÛpia do original para comparaÁ„o posterior:
 nivel_adcp_orig = nivel_adcp; 
 
-% Adiciona valor de +100 para for√ßar todos os dados a positivos:
+% Adiciona valor de +100 para forÁar todos os dados a positivos:
 nivel_adcp = nivel_adcp + 100;
 
-%% Detec√ß√£o e substitui√ß√£o de Outliers:
+%% DetecÁ„o e substituiÁ„o de Outliers:
 %
-% L√≥gica: 
-% 1. Calcula diferen√ßas entre pontos consecutivos (primeira derivada)
-% 2. Identifica pontos onde a diferen√ßa excede "fator_limiar"
-% 3. Substitui outliers por m√©dia local (para 1 ponto) ou interpola√ß√£o 
+% LÛgica: 
+% 1. Calcula diferenÁas entre pontos consecutivos (primeira derivada)
+% 2. Identifica pontos onde a diferenÁa excede "fator_limiar"
+% 3. Substitui outliers por mÈdia local (para 1 ponto) ou interpolaÁ„o 
 %    linear (para 2 pontos)
 
-% Inicializa vari√°veis do Loop principal
-% Armazena posi√ß√µes dos outliers corrigidos:
+% Inicializa vari·veis do Loop principal
+% Armazena posiÁıes dos outliers corrigidos:
 outliers_unicos_nivel = [];  
 
-fprintf('\nIniciando detec√ß√£o e substitui√ß√£o de outliers...\n');
+fprintf('\nIniciando detecÁ„o e substituiÁ„o de outliers...\n');
 
 % Loop principal: 
 for ii=2:roda_varredura_outlier-2
     
-    % C√°lculo da derivada:
+    % C·lculo da derivada:
     diff_nivel = diff(nivel_adcp(1:ii));
     zscore_diff = (diff_nivel - mean(diff_nivel)) / std(diff_nivel);
     
-    % Detec√ß√£o de candidatos a outlier:
+    % DetecÁ„o de candidatos a outlier:
     idx_outliers_candidatos = find(abs(zscore_diff(1:ii-1)) >= fator_limiar);
     
     % Processamento dos candidatos a outlier:
@@ -204,12 +204,12 @@ for ii=2:roda_varredura_outlier-2
         nivel_flags_outliers(1:ii)=zeros;
         nivel_flags_outliers(outliers_corr_int_nivel_POS_nao_nan(1:length(idx_outliers_candidatos)))=1;
         
-        % Adiciona zeros nas pontas pra detectar transi√ß√µes no in√≠cio e
+        % Adiciona zeros nas pontas pra detectar transiÁıes no inÌcio e
         % fim:
         mudancas_flag_outliers = diff([0 nivel_flags_outliers(:)' 0]);
         transicoes_outliers(1:length(mudancas_flag_outliers)) = mudancas_flag_outliers;
         
-        % onde come√ßa grupo de outlier (1):
+        % onde comeÁa grupo de outlier (1):
         nivel_ini = find(transicoes_outliers(:) == 1) ; 
         % onde termina grupo de outlier:
         nivel_fim = find(transicoes_outliers(:) == -1)-1; 
@@ -220,11 +220,11 @@ for ii=2:roda_varredura_outlier-2
         for jj = 1:length(nivel_tam_blocos)
             if nivel_fim(jj)+2 <= length(nivel_adcp)
                 
-                % Para at√© 3 outliers consecutivos, substitui por m√©dia 
+                % Para atÈ 3 outliers consecutivos, substitui por mÈdia 
                 % simples:
                 if nivel_tam_blocos(jj) < 3
                     if nivel_tam_blocos(jj) == 1
-                        fprintf('Grupo %.0f: posi√ß√£o %.0f a %.0f para %.6f (outlier)\n', jj,nivel_ini(jj),nivel_fim(jj));
+                        fprintf('Grupo %.0f: posiÁ„o %.0f a %.0f para %.6f (outlier)\n', jj,nivel_ini(jj),nivel_fim(jj));
                         outlier=nivel_adcp(nivel_fim(jj)+1);
 
                         nivel_adcp(nivel_fim(jj)+1)= ( (nivel_adcp(nivel_fim(jj)+2)) + (nivel_adcp(nivel_fim(jj))) )/2;
@@ -236,8 +236,8 @@ for ii=2:roda_varredura_outlier-2
                         conta_outliers_nivel = conta_outliers_nivel + 1;
                     else
                 % Para 3 ou mais outliers consecutivos, substitui por  
-                % interpola√ß√£o linear:
-                        fprintf('Grupo %.0f: posi√ß√£o %.0f a %.0f para %.6f (outlier)\n', jj,nivel_ini(jj),nivel_fim(jj));
+                % interpolaÁ„o linear:
+                        fprintf('Grupo %.0f: posiÁ„o %.0f a %.0f para %.6f (outlier)\n', jj,nivel_ini(jj),nivel_fim(jj));
                         outlier1=nivel_adcp(nivel_fim(jj)+1);
                         outlier2=nivel_adcp(nivel_fim(jj)+2);
                         
@@ -266,17 +266,17 @@ for ii=2:roda_varredura_outlier-2
     fprintf('ii %.0f\n',ii);
 end
 
-% Subtrai o valor de 100 da vari√°vel do n√≠vel do mar trabalhada:
+% Subtrai o valor de 100 da vari·vel do nÌvel do mar trabalhada:
 nivel_adcp_limpo=nivel_adcp-100;
 
 %% Figuras:
-% Figura 1: Compara√ß√£o do sinal original e do sinal limpo de n√≠vel do mar,
-% em um bloco selecionado da s√©rie temporal. A limpeza remove outliers 
-% individuais detectados via normaliza√ß√£o da diferen√ßa temporal (z-score).
+% Figura 1: ComparaÁ„o do sinal original e do sinal limpo de nÌvel do mar,
+% em um bloco selecionado da sÈrie temporal. A limpeza remove outliers 
+% individuais detectados via normalizaÁ„o da diferenÁa temporal (z-score).
 %
 % A linha vermelha representa o dado original, e a azul o sinal corrigido.
 
-% Define qual bloco ser√° mostrado nos plots:
+% Define qual bloco ser· mostrado nos plots:
 indice_bloco_plot_ini = 1; 
 indice_bloco_plot_fim = tamanho_tempo_total-2; 
 
@@ -288,13 +288,13 @@ plot(tempo_total_vetorial(indice_bloco_plot_ini:indice_bloco_plot_fim),nivel_adc
 grid;
 axis tight;
 xlabel('Tempo - Dt = 5 minutos');
-ylabel('N√≠vel (metros)');
-title(['N√≠vel (metros) - Exemplo de Bloco de Dados Completos, Std: '...
+ylabel('NÌvel (metros)');
+title(['NÌvel (metros) - Exemplo de Bloco de Dados Completos, Std: '...
     ,num2str(std (zscore_diff(indice_bloco_plot_ini:indice_bloco_plot_fim))),', Limiar de Outlier: ',num2str(limiar_corr_int_nivel_nao_nan),' ']);
 
-% Figura 2: Diferen√ßa temporal entre pontos consecutivos da s√©rie (diff).
-% Essa an√°lise evidencia as varia√ß√µes bruscas, auxiliando na detec√ß√£o 
-% de outliers. Sinais suavizados devem apresentar diffs mais homog√™neos.
+% Figura 2: DiferenÁa temporal entre pontos consecutivos da sÈrie (diff).
+% Essa an·lise evidencia as variaÁıes bruscas, auxiliando na detecÁ„o 
+% de outliers. Sinais suavizados devem apresentar diffs mais homogÍneos.
 %
 % Aqui, comparando diff antes e depois da limpeza dos dados.
 figure(2)
@@ -304,29 +304,29 @@ plot(tempo_total_vetorial(indice_bloco_plot_ini:indice_bloco_plot_fim-1),diff(ni
 plot(tempo_total_vetorial(indice_bloco_plot_ini:indice_bloco_plot_fim-1),diff(nivel_adcp_limpo(indice_bloco_plot_ini:indice_bloco_plot_fim)))
 axis tight;
 xlabel('Tempo - Dt = 5 minutos');
-ylabel('Diferen√ßa do N√≠vel (metros)');
+ylabel('DiferenÁa do NÌvel (metros)');
 grid;
-title(['Diff do N√≠vel (metros)']);
+title(['Diff do NÌvel (metros)']);
 
-%% An√°lises Quantitativas da Remo√ß√£o de Outliers:
+%% An·lises Quantitativas da RemoÁ„o de Outliers:
 
 outliers_nivel_corrigidos = unique(outliers_unicos_nivel);
 
-% Porcentagem total de pontos de outliers em rela√ß√£o ao total de dados:
+% Porcentagem total de pontos de outliers em relaÁ„o ao total de dados:
 quantidade_unica_outliers_nivel = length(unique(outliers_unicos_nivel));
 porcentagem_outliers_nivel = (((quantidade_unica_outliers_nivel))/ii);
-fprintf('Porcentagem total de outliers do N√≠vel: %.6f\n', porcentagem_outliers_nivel);
+fprintf('Porcentagem total de outliers do NÌvel: %.6f\n', porcentagem_outliers_nivel);
 
-% Estat√≠stica b√°sica de antes e depois dos outliers:
-% m√©dia:
+% EstatÌstica b·sica de antes e depois dos outliers:
+% mÈdia:
 media_nivel_antes=mean(nivel_adcp_orig(1:ii-1));
 media_nivel_depois=mean(nivel_adcp_limpo(1:ii));
-fprintf('M√©dia antes e depois, do N√≠vel: %.6f e %.6f\n', media_nivel_antes, media_nivel_depois);
+fprintf('MÈdia antes e depois, do NÌvel: %.6f e %.6f\n', media_nivel_antes, media_nivel_depois);
 
 % std:
 std_nivel_antes=std(nivel_adcp_orig(1:ii));
 std_nivel_depois=std(nivel_adcp_limpo(1:ii));
-fprintf('STD antes e depois do N√≠vel: %.6f e %.6f\n', std_nivel_antes, std_nivel_depois);
+fprintf('STD antes e depois do NÌvel: %.6f e %.6f\n', std_nivel_antes, std_nivel_depois);
 
 
 figure(3)
@@ -336,7 +336,7 @@ plot(tempo_total_vetorial(outliers_nivel_corrigidos), nivel_adcp_orig(outliers_n
 plot(tempo_total_vetorial(outliers_nivel_corrigidos), nivel_adcp_limpo(outliers_nivel_corrigidos), 'b')
 title(['Outliers detectados'])
 
-%% Salva as vari√°veis
+%% Salva as vari·veis
 
 % Formato .mat:
 
