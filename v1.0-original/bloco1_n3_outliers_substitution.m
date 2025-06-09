@@ -24,6 +24,10 @@
 %
 % A coautoria simbólica da IA é reconhecida no aspecto técnico,
 % sem implicar autoria científica ou responsabilidade intelectual.
+% 
+% Respositório (em desenvolvimento) de suporte didático por IA para 
+% conteúdos relacionados ao processamento de dados em:
+% https://github.com/htakanaca/AI-Assisted-Learning
 % ------------------------------------------------------------
 %
 % Dados de Nível do Mar (metros):
