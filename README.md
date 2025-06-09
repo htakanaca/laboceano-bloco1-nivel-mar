@@ -37,7 +37,8 @@ Este trabalho foi significativamente auxiliado por modelos de inteligência arti
 As seguintes IAs foram consultadas e forneceram suporte técnico:
 * **ChatGPT** (OpenAI): Consultoria e suporte técnico em maio de 2025.
 * **Grok** (xAI): Consultoria e suporte técnico em maio de 2025.
-* **Gemini** (Google AI): Consultoria e suporte técnico em junho de 2025.
+* **Gemini** (Google AI): Consultoria e suporte técnico em junho de 2025.  
+  Repositório de suporte didático (em desenvolvimento) por IA em: https://github.com/htakanaca/AI-Assisted-Learning
 
 Reconhecemos a contribuição dessas ferramentas como um **apoio técnico** valioso na codificação e na compreensão de algoritmos, sem que isso implique autoria científica, responsabilidade intelectual ou endosso do conteúdo científico final por parte das IAs ou de suas desenvolvedoras. A autoria e a responsabilidade pelo conteúdo e resultados permanecem integralmente com a pesquisadora.
 
