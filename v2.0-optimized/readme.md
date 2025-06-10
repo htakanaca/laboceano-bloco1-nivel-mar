@@ -9,6 +9,13 @@ Este repositório contém os scripts utilizados para o preenchimento de falhas a
 ## Estrutura da Versão 2.0:
 
 * `Dados/`: Scripts MATLAB para análise e processamento dos dados de nível do mar.
+* `bloco1_n1_gapfilling_tide_codiga2011.m`
+* `bloco1_n2_offsets_blending_smooth.m`
+* `bloco1_n3_outliers_substitution.m`
+
+ATENÇÃO: Utiliza a FUNÇÂO "limpa_outliers.m" que pode ser baixada em:  
+
+https://github.com/htakanaca/AI-Assisted-Learning/blob/main/Matlab/Gemini/limpar_outliers.m
 
 
 **Importante:** Os dados originais utilizados neste estudo não estão disponibilizados neste repositório por questões legais e de confidencialidade.
