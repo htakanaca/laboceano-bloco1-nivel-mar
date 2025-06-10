@@ -13,7 +13,7 @@ Este repositório contém os scripts utilizados para o preenchimento de falhas a
 * `bloco1_n2_offsets_blending_smooth.m`
 * `bloco1_n3_outliers_substitution.m`
 
-ATENÇÃO: Utiliza a FUNÇÂO "limpa_outliers.m" que pode ser baixada em:  
+ATENÇÃO: Utiliza a FUNÇÂO `limpa_outliers.m` que pode ser baixada em:  
 
 https://github.com/htakanaca/AI-Assisted-Learning/blob/main/Matlab/Gemini/limpar_outliers.m
 
