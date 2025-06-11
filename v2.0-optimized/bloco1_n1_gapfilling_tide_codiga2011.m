@@ -261,3 +261,27 @@ writetable(T, filename_output_csv, ...
     'FileType', 'text'); % Especifica que é um arquivo de texto
 
 fprintf('Feito!\n')
+
+%% Plotagem para inspeção visual
+%
+% --- Plots: original e previsão harmônica ---
+
+% Define qual bloco será mostrado nos plots:
+indice_bloco_plot_ini = 1;
+indice_bloco_plot_fim = tamanho_tempo_total;
+
+% Inicializa figura, limpando qualquer plot anterior:
+figure(1)
+clf
+hold on
+plot(tempo_total_vetorial(indice_bloco_plot_ini:indice_bloco_plot_fim),nivel_adcp(indice_bloco_plot_ini:indice_bloco_plot_fim),'-m', 'DisplayName', 'Dados Originais com Gaps')
+plot(tempo_total_vetorial(indice_bloco_plot_ini:indice_bloco_plot_fim),nivel_adcp_comtide(indice_bloco_plot_ini:indice_bloco_plot_fim),'-b', 'DisplayName', 'Dados Preenchidos')
+grid;
+axis tight;
+xlabel('Tempo - Dt = 5 minutos');
+ylabel('metros');
+grid on;
+axis tight;
+legend('show', 'Location', 'best');
+title(['Nível (metros) - Séries Original e Preenchida com Previsão Harmônica de Maré']);
+hold off;
