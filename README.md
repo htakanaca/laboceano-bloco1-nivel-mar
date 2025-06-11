@@ -22,6 +22,7 @@ Este repositório contém os scripts utilizados para o preenchimento de falhas a
 
 * **MATLAB**: Desenvolvimento e execução dos scripts.
 * **U-Tide**: Pacote MATLAB para análise harmônica de maré (Codiga, 2011).
+* **Função** `limpa_outliers.m`: Função Matlab disponível para download em: https://github.com/htakanaca/AI-Assisted-Learning/blob/main/Matlab/Gemini/limpar_outliers.m
 * **Processamento**: Identificação automática de falhas amostrais (`NaN`), preenchimento por previsão harmônica ajustada com correção de offset, suavização de offsets restantes e substituição de outliers por média simples dos vizinhos.
 
 ---
