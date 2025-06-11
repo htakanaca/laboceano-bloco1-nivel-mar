@@ -40,6 +40,11 @@
 %   amostrais com o método harmônico (ex: U-Tide).
 % - Os dados devem estar organizados com NaNs para as lacunas.
 %
+% ETAPA DO FLUXOGRAMA:
+% Pós-processamento (etapa 2) - Deve ser executado APÓS:
+%   1. Preenchimento de falhas com U-Tide
+%      (bloco1_n1_gapfilling_tide_codiga2011.m)
+%
 
 clear
 clc
