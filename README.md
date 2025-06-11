@@ -16,8 +16,8 @@ A **versão 2.0** é a versão estável e recomendada para uso. Ela inclui otimi
     * `v2.0-original/Dados`: Pasta para o usuário colocar os dados a serem processados.
     * `U-TIDE/`: Scripts do pacote U-Tide de Codiga (2011), necessários em cada versão do repositório (1.0, 2.0).
     * `U-TIDE/LICENSE`: Termos de licença do pacote U-Tide.
-* **Função Reutilizável:** `limpar_outliers.m` em [Matlab/Gemini/limpar_outliers.m](https://github.com/htakanaca/AI-Assisted-Learning/blob/main/Matlab/Gemini/limpar_outliers.m)
-* **Validação:** `valida_limpeza_outliers.m`
+* **Função Reutilizável:** `limpar_outliers.m` em https://github.com/htakanaca/AI-Assisted-Learning/blob/main/Matlab/Gemini/limpar_outliers.m
+* **Validação:** `valida_limpeza_outliers.m` em https://github.com/htakanaca/AI-Assisted-Learning/blob/main/Matlab/Gemini/valida_limpeza_outliers_gemini.m
 
 A versão anterior (v1.0) é mantida na pasta `v1.0-original` para fins históricos e de comparação.
 
