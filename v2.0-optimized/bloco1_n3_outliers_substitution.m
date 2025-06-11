@@ -198,11 +198,12 @@ fprintf('\nIniciando detecção e substituição de outliers...\n');
 
 % Definição do método de interpolação usado na função de substituição de
 % outliers:
+
 % Escolha um dos métodos:
 % 'linear', 'spline', 'pchip', 'nearest', 'next', 'previous'
 metodo_interp = ['linear'];
 
-[nivel_adcp_limpo,pontos_outliers_corrigidos] = limpar_outliers(nivel_adcp, fator_limiar,metodo_interp);
+[nivel_adcp_limpo,pontos_outliers_corrigidos] = limpar_outliers(nivel_adcp, fator_limiar, metodo_interp);
 
 %% Figuras:
 % Figura 1: Comparação do sinal original e do sinal limpo de nível do mar,
@@ -218,13 +219,17 @@ indice_bloco_plot_fim = tamanho_tempo_total;
 figure(1)
 clf
 hold on
-plot(tempo_total_vetorial(indice_bloco_plot_ini:indice_bloco_plot_fim),nivel_adcp_orig(indice_bloco_plot_ini:indice_bloco_plot_fim),'-r')
-plot(tempo_total_vetorial(indice_bloco_plot_ini:indice_bloco_plot_fim),nivel_adcp_limpo(indice_bloco_plot_ini:indice_bloco_plot_fim))
+plot(tempo_total_vetorial(indice_bloco_plot_ini:indice_bloco_plot_fim),nivel_adcp_orig(indice_bloco_plot_ini:indice_bloco_plot_fim),'-m', 'DisplayName', 'Dados Originais')
+plot(tempo_total_vetorial(indice_bloco_plot_ini:indice_bloco_plot_fim),nivel_adcp_limpo(indice_bloco_plot_ini:indice_bloco_plot_fim),'-b', 'DisplayName', 'Dados Limpos')
 grid;
 axis tight;
 xlabel('Tempo - Dt = 5 minutos');
-ylabel('Nível (metros)');
-title(['Nível (metros) - Exemplo de Bloco de Dados Completos, Limiar de Outlier: ',num2str(fator_limiar),' ']);
+ylabel('metros');
+grid on;
+axis tight;
+legend('show', 'Location', 'best');
+title(['Nível (metros) - Série , Limiar de Outlier: ',num2str(fator_limiar),' ']);
+hold off;
 
 % Figura 2: Diferença temporal entre pontos consecutivos da série (diff).
 % Essa análise evidencia as variações bruscas, auxiliando na detecção
@@ -233,21 +238,30 @@ title(['Nível (metros) - Exemplo de Bloco de Dados Completos, Limiar de Outlier:
 % Aqui, comparando diff antes e depois da limpeza dos dados.
 figure(2)
 clf
-hold
-plot(tempo_total_vetorial(indice_bloco_plot_ini:indice_bloco_plot_fim-1),diff(nivel_adcp_orig(indice_bloco_plot_ini:indice_bloco_plot_fim)),'r')
-plot(tempo_total_vetorial(indice_bloco_plot_ini:indice_bloco_plot_fim-1),diff(nivel_adcp_limpo(indice_bloco_plot_ini:indice_bloco_plot_fim)))
+hold on
+plot(tempo_total_vetorial(indice_bloco_plot_ini:indice_bloco_plot_fim-1),diff(nivel_adcp_orig(indice_bloco_plot_ini:indice_bloco_plot_fim)),'-m', 'DisplayName', 'Dados Originais')
+plot(tempo_total_vetorial(indice_bloco_plot_ini:indice_bloco_plot_fim-1),diff(nivel_adcp_limpo(indice_bloco_plot_ini:indice_bloco_plot_fim)),'-b', 'DisplayName', 'Dados Limpos')
 axis tight;
 xlabel('Tempo - Dt = 5 minutos');
-ylabel('Diferença do Nível (metros)');
-grid;
+ylabel('metros');
+grid on;
+axis tight;
+legend('show', 'Location', 'best');
 title(['Diff do Nível (metros)']);
+hold off;
 
 figure(3)
 clf
 hold on
 plot(tempo_total_vetorial(pontos_outliers_corrigidos), nivel_adcp_orig(pontos_outliers_corrigidos), 'r')
 plot(tempo_total_vetorial(pontos_outliers_corrigidos), nivel_adcp_limpo(pontos_outliers_corrigidos), 'b')
-title(['Outliers detectados'])
+xlabel('Tempo (pontos da série)');
+ylabel('metros');
+grid on;
+axis tight;
+legend('show', 'Location', 'best');
+title(['Nível (metros) da série analisada somente nos pontos de Outliers de detectados e modificados'])
+hold off;
 
 %% Análises Quantitativas da Remoção de Outliers:
 
@@ -262,7 +276,7 @@ fprintf('Porcentagem de outliers na série: %.4f %%\n', porcentagem_outliers_nive
 
 % Estatística básica de antes e depois dos outliers:
 % zera a série original onde tinha falha amostral apenas para estimar a
-% média e std originais da série "bruta":
+% média e std da série original:
 nivel_adcp_orig (isnan(nivel_adcp_orig)) = 0;
 fprintf('Média antes: %.6f | Média depois: %.6f\n', mean(nivel_adcp_orig), mean(nivel_adcp_limpo));
 fprintf('STD antes:   %.6f | STD depois:   %.6f\n', std(nivel_adcp_orig), std(nivel_adcp_limpo));
