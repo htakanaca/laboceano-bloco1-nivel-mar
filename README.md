@@ -1,11 +1,27 @@
 # LabOceano :: Bloco 1 :: Nível do Mar Scripts de Processamento
 ## Dados de Nível do Mar de ADCP na Baía de Guanabara.
 
+![Versão](https://img.shields.io/badge/versão-2.0_estável-brightgreen)   
+
 Este repositório contém os scripts utilizados para o preenchimento de falhas amostrais nos dados de nível do mar obtidos por ADCP da Bóia BH07, localizada na Baía de Guanabara. O método de preenchimento emprega previsão harmônica de maré utilizando o pacote U-Tide (Codiga, 2011) e, posteriormente, aplica suavização de offsets gerados pela previsão e substituição de outliers.
 
 ---
 
-## Estrutura do Repositório
+### Versão Recomendada
+
+A **versão 2.0** é a versão estável e recomendada para uso. Ela inclui otimizações de performance, funções modulares e um script de validação.
+
+* **Scripts Principais em:**
+    * `v2.0-original/`- Versão otimizada e com melhorias da versão 1.0-original.
+    * `v2.0-original/Dados`: Pasta para o usuário colocar os dados a serem processados.
+    * `U-TIDE/`: Scripts do pacote U-Tide de Codiga (2011), necessários em cada versão do repositório (1.0, 2.0).
+    * `U-TIDE/LICENSE`: Termos de licença do pacote U-Tide.
+* **Função Reutilizável:** `limpar_outliers.m` em [Matlab/Gemini/limpar_outliers.m](https://github.com/htakanaca/AI-Assisted-Learning/blob/main/Matlab/Gemini/limpar_outliers.m)
+* **Validação:** `valida_limpeza_outliers.m`
+
+A versão anterior (v1.0) é mantida na pasta `v1.0-original` para fins históricos e de comparação.
+
+## Estrutura Completa do Repositório
 
 * `v1.0-original/`: Scripts MATLAB para análise e processamento dos dados de nível do mar, versão original, sem otimizações e melhorias.
 * `v1.0-original/Dados`: Pasta para o usuário colocar os dados a serem processados.
